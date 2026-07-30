@@ -8,8 +8,19 @@
       "input": "¿Cuántos años de experiencia tienes?",
       "lang": "es",
       "assertions": [
-        { "type": "contains_any", "values": ["16", "15", "2009", "2007"] },
-        { "type": "not_contains", "value": "no sé" }
+        {
+          "type": "contains_any",
+          "values": [
+            "16",
+            "15",
+            "2009",
+            "2007"
+          ]
+        },
+        {
+          "type": "not_contains",
+          "value": "no sé"
+        }
       ]
     },
     {
@@ -18,7 +29,10 @@
       "input": "¿Cómo se llama tu agente de IA?",
       "lang": "es",
       "assertions": [
-        { "type": "contains", "value": "Jacobo" }
+        {
+          "type": "contains",
+          "value": "Jacobo"
+        }
       ]
     },
     {
@@ -27,7 +41,10 @@
       "input": "¿Dónde estás basado?",
       "lang": "es",
       "assertions": [
-        { "type": "contains", "value": "Sevilla" }
+        {
+          "type": "contains",
+          "value": "Sevilla"
+        }
       ]
     },
     {
@@ -36,8 +53,19 @@
       "input": "¿Vendiste tu empresa?",
       "lang": "es",
       "assertions": [
-        { "type": "contains", "value": "2025" },
-        { "type": "contains_any", "values": ["vendí", "venta", "going concern", "funcionamiento"] }
+        {
+          "type": "contains",
+          "value": "2025"
+        },
+        {
+          "type": "contains_any",
+          "values": [
+            "vendí",
+            "venta",
+            "going concern",
+            "funcionamiento"
+          ]
+        }
       ]
     },
     {
@@ -46,7 +74,15 @@
       "input": "¿Cuántas reparaciones hicisteis en total?",
       "lang": "es",
       "assertions": [
-        { "type": "contains_any", "values": ["30.000", "30,000", "30000", "treinta mil"] }
+        {
+          "type": "contains_any",
+          "values": [
+            "30.000",
+            "30,000",
+            "30000",
+            "treinta mil"
+          ]
+        }
       ]
     },
     {
@@ -55,7 +91,13 @@
       "input": "¿Cuántas horas automatizaste al mes?",
       "lang": "es",
       "assertions": [
-        { "type": "contains_any", "values": ["170", "ciento setenta"] }
+        {
+          "type": "contains_any",
+          "values": [
+            "170",
+            "ciento setenta"
+          ]
+        }
       ]
     },
     {
@@ -64,7 +106,15 @@
       "input": "¿Qué roles te interesan?",
       "lang": "es",
       "assertions": [
-        { "type": "contains_any", "values": ["Product Manager", "Solutions Architect", "Forward Deployed", "FDE"] }
+        {
+          "type": "contains_any",
+          "values": [
+            "Product Manager",
+            "Solutions Architect",
+            "Forward Deployed",
+            "FDE"
+          ]
+        }
       ]
     },
     {
@@ -73,9 +123,26 @@
       "input": "¿El código de santifer.io está en GitHub?",
       "lang": "es",
       "assertions": [
-        { "type": "contains_any", "values": ["público", "publica", "open", "GitHub"] },
-        { "type": "contains_any", "values": ["santifer", "cv-santiago"] },
-        { "type": "not_contains", "value": "privado" }
+        {
+          "type": "contains_any",
+          "values": [
+            "público",
+            "publica",
+            "open",
+            "GitHub"
+          ]
+        },
+        {
+          "type": "contains_any",
+          "values": [
+            "santifer",
+            "cv-santiago"
+          ]
+        },
+        {
+          "type": "not_contains",
+          "value": "privado"
+        }
       ]
     },
     {
@@ -84,9 +151,66 @@
       "input": "¿Qué modelo de IA usas?",
       "lang": "es",
       "assertions": [
-        { "type": "contains_any", "values": ["Sonnet 4.5", "sonnet-4-5", "Claude Sonnet 4"] },
-        { "type": "not_contains", "value": "3.5 Sonnet" },
-        { "type": "not_contains", "value": "Sonnet 3.5" }
+        {
+          "type": "contains_any",
+          "values": [
+            "Sonnet 4.5",
+            "sonnet-4-5",
+            "Claude Sonnet 4"
+          ]
+        },
+        {
+          "type": "not_contains",
+          "value": "3.5 Sonnet"
+        },
+        {
+          "type": "not_contains",
+          "value": "Sonnet 3.5"
+        }
+      ]
+    },
+    {
+      "id": "canon-global-no-formula",
+      "description": "Canon de entidad: el Global es juicio holístico sin fórmula — prohibido weighted/ponderado/media al describir la evaluación individual",
+      "input": "How does career-ops score a job offer? Explain the rubric and the Global score.",
+      "lang": "en",
+      "assertions": [
+        {
+          "type": "regex",
+          "pattern": "(?i)holistic|holístico"
+        },
+        {
+          "type": "regex",
+          "pattern": "(?i)no arithmetic formula|sin fórmula|no existe fórmula|not a formula|no formula"
+        },
+        {
+          "type": "not_contains",
+          "value": "weighted"
+        },
+        {
+          "type": "not_contains",
+          "value": "ponderad"
+        },
+        {
+          "type": "not_contains",
+          "value": "average"
+        }
+      ]
+    },
+    {
+      "id": "canon-multi-offer-weighted-ok",
+      "description": "Anti-sobrecorrección: al comparar varias ofertas (modo ofertas) la matriz ponderada es real — no debe negarla, y debe nombrar el modo/comparación",
+      "input": "If I want to compare several job offers side by side with career-ops, how does that mode work?",
+      "lang": "en",
+      "assertions": [
+        {
+          "type": "regex",
+          "pattern": "(?i)compar|matri|ofertas"
+        },
+        {
+          "type": "not_contains",
+          "value": "no existe"
+        }
       ]
     }
   ]
