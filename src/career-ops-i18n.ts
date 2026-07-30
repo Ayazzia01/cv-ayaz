@@ -24,10 +24,10 @@ export const careerOpsContent = {
       { value: '631', label: 'Evaluaciones' },
       { value: '302', label: 'Apps procesadas' },
       { value: '12', label: 'Modos' },
-      { value: 'A-F', label: 'Grade scoring' },
+      { value: '1.0–5.0', label: 'Escala del Global' },
       { value: '680', label: 'URLs dedup' },
     ],
-    tldr: 'Un sistema multi-agente construido con Claude Code que automatiza la búsqueda de empleo: evalúa ofertas con scoring multi-dimensional (A-F), genera PDFs ATS-optimized personalizados, rellena formularios vía Playwright y procesa en batch con workers paralelos. HITL: la IA analiza, yo decido. Open source bajo MIT — 62.2K+ estrellas, 4.300+ en Discord.',
+    tldr: 'Un sistema multi-agente construido con Claude Code que automatiza la búsqueda de empleo: evalúa ofertas con evaluación multi-dimensional y un Global de 1,0 a 5,0, genera PDFs ATS-optimized personalizados, rellena formularios vía Playwright y procesa en batch con workers paralelos. HITL: la IA analiza, yo decido. Open source bajo MIT — 62.2K+ estrellas, 4.300+ en Discord.',
     starChart: {
       alt: 'El warp chart de career-ops — de 0 a 62.2K+ estrellas en GitHub, en vivo',
       caption: 'El warp chart de career-ops, en tiempo real — por',
@@ -88,7 +88,7 @@ export const careerOpsContent = {
           ],
         },
         modes: [
-          { name: 'auto-pipeline', desc: 'Pipeline completo: extraer JD, evaluar A-F, generar report, PDF y tracker.' },
+          { name: 'auto-pipeline', desc: 'Pipeline completo: extraer JD, evaluar con la rúbrica, generar report, PDF y tracker.' },
           { name: 'oferta', desc: 'Evaluación individual con 6 bloques: resumen, CV match, nivel, compensación, personalización, entrevista.' },
           { name: 'ofertas', desc: 'Comparación y ranking de múltiples ofertas.' },
           { name: 'pdf', desc: 'PDF ATS-optimized personalizado por oferta con proof points y keywords.' },
@@ -137,7 +137,7 @@ export const careerOpsContent = {
         body: 'auto-pipeline es el modo estrella. Una URL entra, y sale un report de evaluación, un PDF personalizado y una línea en el tracker. Zero intervención manual hasta la revisión final.',
         steps: [
           { label: 'Extraer JD.', detail: 'Playwright navega a la URL, extrae el contenido estructurado de la oferta.' },
-          { label: 'Evaluar A-F.', detail: 'Claude lee JD + CV + portfolio y genera scoring multi-dimensional con grade.' },
+          { label: 'Evaluar la oferta.', detail: 'Claude lee JD + CV + portfolio y genera una evaluación multi-dimensional con un Global de 1,0 a 5,0.' },
           { label: 'Generar report.', detail: 'Markdown con 6 bloques: resumen ejecutivo, CV match, nivel, compensación, personalización y probabilidad de entrevista.' },
           { label: 'Generar PDF.', detail: 'HTML template + keyword injection + adaptive framing. Puppeteer renderiza a PDF.' },
           { label: 'Registrar tracker.', detail: 'TSV con company, role, score, grade, URL. Auto-merge vía script Node.js.' },
@@ -184,7 +184,7 @@ export const careerOpsContent = {
         heading: 'Antes y Después',
         headers: ['Dimensión', 'Manual', 'career-ops'],
         rows: [
-          ['Evaluación', 'Leer JD, mapeo mental', 'Scoring A-F automático multi-dimensional'],
+          ['Evaluación', 'Leer JD, mapeo mental', 'Evaluación multi-dimensional automática (Global 1,0–5,0)'],
           ['CV', 'PDF genérico', 'PDF personalizado, ATS-optimized'],
           ['Aplicación', 'Formulario manual', 'Playwright auto-fill'],
           ['Tracking', 'Spreadsheet o nada', 'TSV + dedup automático'],
@@ -361,10 +361,10 @@ export const careerOpsContent = {
       { value: '631', label: 'Evaluations' },
       { value: '302', label: 'Apps processed' },
       { value: '12', label: 'Modes' },
-      { value: 'A-F', label: 'Grade scoring' },
+      { value: '1.0–5.0', label: 'Escala del Global' },
       { value: '680', label: 'URLs deduped' },
     ],
-    tldr: 'A multi-agent system built with Claude Code that automates the job search: scores offers multi-dimensional (A-F), generates ATS-optimized PDFs per offer, fills forms via Playwright, and batch-processes with parallel workers. HITL design: AI analyzes, I decide. Open source under MIT — 62.2K+ stars, 4,300+ on Discord.',
+    tldr: 'A multi-agent system built with Claude Code that automates the job search: scores offers multi-dimensional with a 1.0–5.0 Global score, generates ATS-optimized PDFs per offer, fills forms via Playwright, and batch-processes with parallel workers. HITL design: AI analyzes, I decide. Open source under MIT — 62.2K+ stars, 4,300+ on Discord.',
     starChart: {
       alt: 'The career-ops warp chart — 0 to 62.2K+ GitHub stars, live',
       caption: 'The career-ops warp chart, warpcharted in real time by',
@@ -425,7 +425,7 @@ export const careerOpsContent = {
           ],
         },
         modes: [
-          { name: 'auto-pipeline', desc: 'Full pipeline: extract JD, evaluate A-F, generate report, PDF, and tracker entry.' },
+          { name: 'auto-pipeline', desc: 'Full pipeline: extract JD, evaluate against the rubric, generate report, PDF, and tracker entry.' },
           { name: 'oferta', desc: 'Single-offer evaluation with 6 blocks: summary, CV match, level, compensation, personalization, interview.' },
           { name: 'ofertas', desc: 'Multi-offer comparison and ranking.' },
           { name: 'pdf', desc: 'ATS-optimized PDF personalized per offer with proof points and keywords.' },
@@ -474,7 +474,7 @@ export const careerOpsContent = {
         body: 'auto-pipeline is the flagship mode. A URL goes in, and out comes an evaluation report, a personalized PDF, and a tracker entry. Zero manual intervention until final review.',
         steps: [
           { label: 'Extract JD.', detail: 'Playwright navigates to the URL, extracts structured content from the offer.' },
-          { label: 'Evaluate A-F.', detail: 'Claude reads JD + CV + portfolio and generates multi-dimensional scoring with grade.' },
+          { label: 'Evaluate the offer.', detail: 'Claude reads JD + CV + portfolio and generates a multi-dimensional evaluation with a 1.0–5.0 Global score.' },
           { label: 'Generate report.', detail: 'Markdown with 6 blocks: executive summary, CV match, level, compensation, personalization, and interview probability.' },
           { label: 'Generate PDF.', detail: 'HTML template + keyword injection + adaptive framing. Puppeteer renders to PDF.' },
           { label: 'Register tracker.', detail: 'TSV with company, role, score, grade, URL. Auto-merge via Node.js script.' },
@@ -521,7 +521,7 @@ export const careerOpsContent = {
         heading: 'Before and After',
         headers: ['Dimension', 'Manual', 'career-ops'],
         rows: [
-          ['Evaluation', 'Read JD, mental mapping', 'A-F automated scoring, multi-dimensional'],
+          ['Evaluation', 'Read JD, mental mapping', 'Automated multi-dimensional evaluation (1.0–5.0 Global)'],
           ['CV', 'Generic PDF', 'Personalized PDF, ATS-optimized'],
           ['Application', 'Manual form', 'Playwright auto-fill'],
           ['Tracking', 'Spreadsheet or nothing', 'TSV + automated dedup'],

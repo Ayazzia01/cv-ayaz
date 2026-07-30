@@ -1,9 +1,9 @@
 {
-  "date": "2026-07-21T09:06:52",
-  "passRate": 0.971830985915493,
-  "totalTests": 71,
-  "passed": 69,
-  "failed": 2,
+  "date": "2026-07-30T11:53:06",
+  "passRate": 0.9315068493150684,
+  "totalTests": 73,
+  "passed": 68,
+  "failed": 5,
   "categories": [
     {
       "name": "boundary_testing",
@@ -13,9 +13,9 @@
     },
     {
       "name": "factual_accuracy",
-      "total": 9,
-      "passed": 9,
-      "passRate": 1
+      "total": 11,
+      "passed": 10,
+      "passRate": 0.91
     },
     {
       "name": "language_handling",
@@ -26,8 +26,8 @@
     {
       "name": "multi_turn",
       "total": 5,
-      "passed": 4,
-      "passRate": 0.8
+      "passed": 3,
+      "passRate": 0.6
     },
     {
       "name": "persona_adherence",
@@ -56,8 +56,8 @@
     {
       "name": "source_badges",
       "total": 5,
-      "passed": 5,
-      "passRate": 1
+      "passed": 4,
+      "passRate": 0.8
     },
     {
       "name": "voice_quality",

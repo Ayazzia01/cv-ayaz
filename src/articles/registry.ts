@@ -502,7 +502,7 @@ export const articleRegistry: ArticleConfig[] = [
       es: {
         'the-problem': 'El Problema',
         'architecture': 'Multi-Agent System',
-        'scoring': 'Scoring A-F',
+        'scoring': 'Evaluación y Global',
         'pipeline': 'El Pipeline',
         'pdf': 'AI Resume Builder',
         'before-after': 'Antes/Después',
@@ -514,7 +514,7 @@ export const articleRegistry: ArticleConfig[] = [
       en: {
         'the-problem': 'The Problem',
         'architecture': 'Multi-Agent System',
-        'scoring': 'A-F Scoring',
+        'scoring': 'Evaluation & Global',
         'pipeline': 'The Pipeline',
         'pdf': 'AI Resume Builder',
         'before-after': 'Before/After',

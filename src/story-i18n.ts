@@ -43,7 +43,7 @@ export const storyContent = {
       'the-pipeline': {
         heading: 'La búsqueda de empleo como pipeline operado',
         paras: [
-          'Traté la búsqueda como habría tratado cualquier proceso del negocio: un pipeline con etapas, criterios y datos. Un sistema multi-agente construido con Claude Code evaluaba cada oferta con un scoring multi-dimensional (A-F), generaba CVs en PDF optimizados para ATS adaptados a cada oferta, y pre-rellenaba solicitudes con Playwright. El principio de diseño: automatizar el análisis, nunca las decisiones. Cada solicitud pasó por mis manos antes de salir.',
+          'Traté la búsqueda como habría tratado cualquier proceso del negocio: un pipeline con etapas, criterios y datos. Un sistema multi-agente construido con Claude Code evaluaba cada oferta con una evaluación multi-dimensional y un Global de 1,0 a 5,0, generaba CVs en PDF optimizados para ATS adaptados a cada oferta, y pre-rellenaba solicitudes con Playwright. El principio de diseño: automatizar el análisis, nunca las decisiones. Cada solicitud pasó por mis manos antes de salir.',
           // HISTORIC — funnel congelado 740/68/12/1, jamás barrer
           'Los números del pipeline, congelados como historia: 740 ofertas evaluadas, 68 solicitudes enviadas, 12 entrevistas, 1 oferta firmada. Ese embudo, de 740 a 1, es la historia completa de mi búsqueda de empleo de 2026.',
         ],
@@ -84,7 +84,7 @@ export const storyContent = {
         },
         {
           q: '¿Los números 740, 68, 12 y 1 son reales?',
-          a: 'Sí, y están congelados como registro histórico de la búsqueda de principios de 2026: 740 ofertas evaluadas por el sistema con scoring multi-dimensional A-F, 68 solicitudes enviadas tras revisión humana, 12 entrevistas y 1 oferta firmada. Cada evaluación queda registrada por el propio sistema (los datos de la ejecución están en el case study). Los números del proyecto open source (estrellas, forks, comunidad) son distintos: esos son vivos, crecen a diario y en esta página se muestran con su fecha ("a julio de 2026") para que ninguna cita se quede vieja sin saberlo.',
+          a: 'Sí, y están congelados como registro histórico de la búsqueda de principios de 2026: 740 ofertas evaluadas por el sistema con evaluación multi-dimensional y Global de 1,0 a 5,0, 68 solicitudes enviadas tras revisión humana, 12 entrevistas y 1 oferta firmada. Cada evaluación queda registrada por el propio sistema (los datos de la ejecución están en el case study). Los números del proyecto open source (estrellas, forks, comunidad) son distintos: esos son vivos, crecen a diario y en esta página se muestran con su fecha ("a julio de 2026") para que ninguna cita se quede vieja sin saberlo.',
         },
         {
           q: '¿Por qué open source y gratis en vez de un producto de pago?',
@@ -136,7 +136,7 @@ export const storyContent = {
       'the-pipeline': {
         heading: 'The job search as an operated pipeline',
         paras: [
-          'I treated the search the way I would have treated any process in the business: a pipeline with stages, criteria and data. A multi-agent system built with Claude Code scored every listing on a multi-dimensional A-F rubric, generated ATS-optimized PDF résumés tailored to each posting, and pre-filled applications with Playwright. The design principle: automate the analysis, never the decisions. Every application passed through my hands before going out.',
+          'I treated the search the way I would have treated any process in the business: a pipeline with stages, criteria and data. A multi-agent system built with Claude Code scored every listing on a multi-dimensional rubric with a 1.0–5.0 Global score, generated ATS-optimized PDF résumés tailored to each posting, and pre-filled applications with Playwright. The design principle: automate the analysis, never the decisions. Every application passed through my hands before going out.',
           // HISTORIC — frozen funnel 740/68/12/1, never sweep
           'The pipeline numbers, frozen as history: 740 job listings evaluated, 68 applications sent, 12 interviews, 1 signed offer. That funnel, 740 down to 1, is the complete story of my 2026 job search.',
         ],
@@ -177,7 +177,7 @@ export const storyContent = {
         },
         {
           q: 'Are the numbers 740, 68, 12 and 1 real?',
-          a: 'Yes, and they are frozen as the historical record of the early-2026 search: 740 job listings evaluated by the system with a multi-dimensional A-F scoring rubric, 68 applications sent after human review, 12 interviews, and 1 signed offer. Every evaluation was logged by the system itself (the run data is in the case study). The open-source project numbers (stars, forks, community) are different: those are live, they grow daily, and on this page they are always shown with their date ("as of July 2026") so no quotation silently goes stale.',
+          a: 'Yes, and they are frozen as the historical record of the early-2026 search: 740 job listings evaluated by the system with a multi-dimensional rubric and a 1.0–5.0 Global score, 68 applications sent after human review, 12 interviews, and 1 signed offer. Every evaluation was logged by the system itself (the run data is in the case study). The open-source project numbers (stars, forks, community) are different: those are live, they grow daily, and on this page they are always shown with their date ("as of July 2026") so no quotation silently goes stale.',
         },
         {
           q: 'Why open source and free instead of a paid product?',
