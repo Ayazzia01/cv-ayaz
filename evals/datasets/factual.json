@@ -171,45 +171,45 @@
     },
     {
       "id": "canon-global-no-formula",
-      "description": "Canon de entidad: el Global es juicio holístico sin fórmula — prohibido weighted/ponderado/media al describir la evaluación individual",
+      "description": "Canon de entidad: el Global es juicio holistico sin formula aritmetica. Las negativas van por llm_judge, no por not_contains: el bot PUEDE decir 'no weighted average' (negacion correcta) o usar 'weighted' para el modo ofertas.",
       "input": "How does career-ops score a job offer? Explain the rubric and the Global score.",
       "lang": "en",
       "assertions": [
         {
           "type": "regex",
-          "pattern": "(?i)holistic|holístico"
+          "pattern": "holistic|holístico",
+          "flags": "i"
         },
         {
           "type": "regex",
-          "pattern": "(?i)no arithmetic formula|sin fórmula|no existe fórmula|not a formula|no formula"
+          "pattern": "not a formula|no arithmetic|no formula|sin fórmula|no existe fórmula",
+          "flags": "i"
         },
         {
-          "type": "not_contains",
-          "value": "weighted"
+          "type": "regex",
+          "pattern": "five[- ]dimension|cinco dimensiones",
+          "flags": "i"
         },
         {
-          "type": "not_contains",
-          "value": "ponderad"
-        },
-        {
-          "type": "not_contains",
-          "value": "average"
+          "type": "llm_judge",
+          "criteria": "La respuesta deja claro que el Global del modo de evaluacion individual NO se calcula con una formula aritmetica ni con una media ponderada. Si menciona 'weighted' o 'average', debe ser SOLO para negarlo ('no weighted average') o para referirse explicitamente al modo distinto de comparacion multi-oferta. NO debe implicar en ningun momento que el Global sea reproducible con un calculo."
         }
       ]
     },
     {
       "id": "canon-multi-offer-weighted-ok",
-      "description": "Anti-sobrecorrección: al comparar varias ofertas (modo ofertas) la matriz ponderada es real — no debe negarla, y debe nombrar el modo/comparación",
+      "description": "Anti-sobrecorreccion: la matriz ponderada del modo ofertas es real y no debe negarse; debe nombrar el modo o la comparacion",
       "input": "If I want to compare several job offers side by side with career-ops, how does that mode work?",
       "lang": "en",
       "assertions": [
         {
           "type": "regex",
-          "pattern": "(?i)compar|matri|ofertas"
+          "pattern": "compar|matri|ofertas",
+          "flags": "i"
         },
         {
-          "type": "not_contains",
-          "value": "no existe"
+          "type": "llm_judge",
+          "criteria": "La respuesta describe el modo de comparacion multi-oferta como una matriz de dimensiones con pesos explicitos (weighted es correcto aqui) y NO niega que existan pesos en ese modo. Debe identificar que se trata del modo de comparacion, no del de evaluacion individual."
         }
       ]
     }
