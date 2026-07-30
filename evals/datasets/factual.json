@@ -192,7 +192,7 @@
         },
         {
           "type": "llm_judge",
-          "criteria": "La respuesta deja claro que el Global del modo de evaluacion individual NO se calcula con una formula aritmetica ni con una media ponderada. Si menciona 'weighted' o 'average', debe ser SOLO para negarlo ('no weighted average') o para referirse explicitamente al modo distinto de comparacion multi-oferta. NO debe implicar en ningun momento que el Global sea reproducible con un calculo."
+          "criteria": "La respuesta deja claro que el Global del modo de evaluacion individual NO se calcula con una formula aritmetica ni con una media ponderada. Si menciona 'weighted' o 'average', debe ser SOLO para negarlo ('no weighted average') o para referirse explicitamente al modo distinto de comparacion multi-oferta. NO debe implicar en ningun momento que el Global sea reproducible con un calculo. Ademas: el score Global debe expresarse como numero en escala 1.0-5.0, NUNCA como letra ni rango de letras; si aparece un rango de letras (A-F, A-G, A-H) debe referirse a SECCIONES del informe de evaluacion, nunca a la escala del score."
         }
       ]
     },
