@@ -144,7 +144,7 @@ export const aiAgentFleetContent = {
             ['PRs fusionadas', '777'],
             ['Releases desde el despegue de abril', '27 (última: v0.4.0, 28 de julio)'],
             ['Suite de tests', '1.667 aserciones, 0 fallando (jul 2026)'],
-            ['Miembros de Discord', '4.300'],
+            ['Miembros de Discord', '4.400'],
             ['Tráfico semanal', '26.831 visitantes únicos · 8.680 cloners únicos — 32% view→clone (jul 2026)'],
             ['Ranking mundial', 'uno de los ~350 repos con más estrellas de GitHub (warpchart, jul 2026)'],
             ['Presupuesto de atención humana', 'Tardes y fines de semana'],
@@ -160,7 +160,7 @@ export const aiAgentFleetContent = {
       community: {
         heading: 'La comunidad corre sobre los mismos principios',
         paras: [
-          'El Discord de 4.300 miembros recibe la misma disciplina que el codebase, con gates más ligeros. Un agente community-brain barre los canales y destila el chat en un ledger consultable: dolores recurrentes, feature requests, promesas hechas. Las peticiones nuevas se deduplican contra las issues existentes, y lo que sobrevive se convierte en issues etiquetadas y RFCs en el roadmap público. Un bot de FAQ grounded responde las preguntas de setup desde la propia documentación del repo — cero respuestas alucinadas observadas hasta ahora — y deriva a un humano cuando la documentación no llega.',
+          'El Discord de 4.400 miembros recibe la misma disciplina que el codebase, con gates más ligeros. Un agente community-brain barre los canales y destila el chat en un ledger consultable: dolores recurrentes, feature requests, promesas hechas. Las peticiones nuevas se deduplican contra las issues existentes, y lo que sobrevive se convierte en issues etiquetadas y RFCs en el roadmap público. Un bot de FAQ grounded responde las preguntas de setup desde la propia documentación del repo — cero respuestas alucinadas observadas hasta ahora — y deriva a un humano cuando la documentación no llega.',
           'Los gates aquí son más ligeros porque el error budget es mayor: una respuesta errónea del FAQ recibe una corrección humana, donde un merge erróneo recibiría un revert y un post-mortem.',
           'Este año la comunidad reportó a su primer miembro consiguiendo trabajo con la herramienta. La adopción es un sistema, y este cierra su loop en público.',
         ],
@@ -419,7 +419,7 @@ export const aiAgentFleetContent = {
             ['Merged PRs', '777'],
             ['Releases since the April launch', '27 (latest: v0.4.0, July 28)'],
             ['Test suite', '1,667 assertions, 0 failing (Jul 2026)'],
-            ['Discord members', '4,300'],
+            ['Discord members', '4,400'],
             ['Weekly traffic', '26,831 unique visitors · 8,680 unique cloners — 32% view→clone (Jul 2026)'],
             ['Worldwide rank', 'one of the ~350 most-starred repositories on GitHub (warpchart, Jul 2026)'],
             ['Human attention budget', 'Evenings and weekends'],
@@ -435,7 +435,7 @@ export const aiAgentFleetContent = {
       community: {
         heading: 'The community runs on the same principles',
         paras: [
-          'The 4,300-member Discord gets the same discipline as the codebase, with lighter gates. A community-brain agent sweeps the channels and distills chat into a queryable ledger: recurring pains, feature requests, promises made. New requests get deduped against existing issues, and what survives becomes labeled issues and RFCs on the public roadmap. A grounded FAQ bot answers setup questions from the repo\'s own docs, with zero hallucinated answers observed so far, and hands off to a human when the docs don\'t cover it.',
+          'The 4,400-member Discord gets the same discipline as the codebase, with lighter gates. A community-brain agent sweeps the channels and distills chat into a queryable ledger: recurring pains, feature requests, promises made. New requests get deduped against existing issues, and what survives becomes labeled issues and RFCs on the public roadmap. A grounded FAQ bot answers setup questions from the repo\'s own docs, with zero hallucinated answers observed so far, and hands off to a human when the docs don\'t cover it.',
           'The gates are lighter here because the error budget is bigger: a wrong FAQ answer gets a human correction, where a wrong merge would get a revert and a post-mortem.',
           'This year the community reported its first member landing a job with the tool. Adoption is a system, and this one closes its loop in public.',
         ],

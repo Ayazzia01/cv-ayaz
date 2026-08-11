@@ -7,7 +7,7 @@ export const careerOpsContent = {
     readingTime: '18 min de lectura',
     seo: {
       title: 'career-ops: Agente IA que Automatiza Mi Búsqueda de Empleo',
-      description: 'Case study: agente IA multi-agente que evalúa ofertas con scoring multi-dimensional, crea CV con IA personalizados y automatiza aplicaciones. 631 evaluaciones.',
+      description: 'Case study: agente IA multi-agente que evalúa ofertas con scoring multi-dimensional, crea CV con IA personalizados y automatiza aplicaciones.',
     },
     nav: {
       breadcrumbHome: 'Inicio',
@@ -21,13 +21,13 @@ export const careerOpsContent = {
       date: '17 mar 2026',
     },
     heroMetrics: [
-      { value: '631', label: 'Evaluaciones' },
-      { value: '302', label: 'Apps procesadas' },
+      { value: '740', label: 'Ofertas evaluadas' },
+      { value: '68', label: 'Solicitudes enviadas' },
       { value: '12', label: 'Modos' },
       { value: '1.0–5.0', label: 'Escala del Global' },
-      { value: '680', label: 'URLs dedup' },
+      { value: '1', label: 'Oferta firmada' },
     ],
-    tldr: 'Un sistema multi-agente construido con Claude Code que automatiza la búsqueda de empleo: evalúa ofertas con evaluación multi-dimensional y un Global de 1,0 a 5,0, genera PDFs ATS-optimized personalizados, rellena formularios vía Playwright y procesa en batch con workers paralelos. HITL: la IA analiza, yo decido. Open source bajo MIT — 62.2K+ estrellas, 4.300+ en Discord.',
+    tldr: 'Un sistema multi-agente construido con Claude Code que automatiza la búsqueda de empleo: evalúa ofertas con evaluación multi-dimensional y un Global de 1,0 a 5,0, genera PDFs ATS-optimized personalizados, rellena formularios vía Playwright y procesa en batch con workers paralelos. HITL: la IA analiza, yo decido. Open source bajo MIT — 62.2K+ estrellas, 4.400+ en Discord.',
     starChart: {
       alt: 'El warp chart de career-ops — de 0 a 62.2K+ estrellas en GitHub, en vivo',
       caption: 'El warp chart de career-ops, en tiempo real — por',
@@ -61,7 +61,7 @@ export const careerOpsContent = {
     sections: {
       intro: {
         hook: 'Construí un sistema de IA para buscar trabajo. Funcionó — ahora soy Head of Applied AI. Luego lo publiqué en GitHub y explotó: 62.2K+ estrellas, viral, artículos en Francia, China y Corea. La primera semana buscando trabajo en IA lo hice todo manual. La segunda semana ya no aplicaba — estaba construyendo career-ops.',
-        body: '631 evaluaciones después, career-ops filtraba mejor que yo. Un AI job search tool construido como multi-agent system: lee ofertas, las puntúa multi-dimensional, genera CV personalizados y prepara aplicaciones. Yo revisaba y decidía. La IA hacía el trabajo analítico. El sistema demostró exactamente las competencias que los puestos pedían — y eso no pasó desapercibido.',
+        body: 'Cientos de evaluaciones después, career-ops filtraba mejor que yo. Un AI job search tool construido como multi-agent system: lee ofertas, las puntúa multi-dimensional, genera CV personalizados y prepara aplicaciones. Yo revisaba y decidía. La IA hacía el trabajo analítico. El sistema demostró exactamente las competencias que los puestos pedían — y eso no pasó desapercibido.',
       },
       theProblem: {
         heading: '¿Por Qué Necesité Automatizar Mi Búsqueda de Empleo?',
@@ -94,7 +94,7 @@ export const careerOpsContent = {
           { name: 'pdf', desc: 'PDF ATS-optimized personalizado por oferta con proof points y keywords.' },
           { name: 'pipeline', desc: 'Procesamiento batch de URLs desde inbox.' },
           { name: 'scan', desc: 'Descubrimiento de ofertas: navega portales de empleo y páginas de careers de empresas target. Muchas ofertas no aparecen en agregadores.' },
-          { name: 'batch', desc: 'Processing paralelo con conductor + workers. 122 URLs en cola simultánea.' },
+          { name: 'batch', desc: 'Processing paralelo con conductor + workers: varias URLs en cola simultánea.' },
           { name: 'apply', desc: 'Form-filling interactivo con Playwright. Lee la página, recupera evaluación y genera respuestas.' },
           { name: 'contacto', desc: 'Helper de outreach para LinkedIn.' },
           { name: 'deep', desc: 'Research profundo de empresas.' },
@@ -141,13 +141,13 @@ export const careerOpsContent = {
           { label: 'Generar report.', detail: 'Markdown con 6 bloques: resumen ejecutivo, CV match, nivel, compensación, personalización y probabilidad de entrevista.' },
           { label: 'Generar PDF.', detail: 'HTML template + keyword injection + adaptive framing. Puppeteer renderiza a PDF.' },
           { label: 'Registrar tracker.', detail: 'TSV con company, role, score, grade, URL. Auto-merge vía script Node.js.' },
-          { label: 'Dedup.', detail: 'Comprueba scan-history.tsv (680 URLs) y applications.md. Zero re-evaluaciones.' },
+          { label: 'Dedup.', detail: 'Comprueba scan-history.tsv y applications.md. Zero re-evaluaciones.' },
         ],
         batch: {
           heading: 'Batch Processing',
           body: 'Para volumen alto, el modo batch lanza un conductor que orquesta workers paralelos. Cada worker es un proceso Claude Code independiente con 200K de contexto. El conductor gestiona la cola, trackea progreso y fusiona resultados.',
           metrics: [
-            { value: '122', label: 'URLs en cola' },
+            { value: '8', label: 'Workers en paralelo' },
             { value: '200K', label: 'Contexto/worker' },
             { value: '2x', label: 'Retries por fallo' },
           ],
@@ -189,17 +189,17 @@ export const careerOpsContent = {
           ['Aplicación', 'Formulario manual', 'Playwright auto-fill'],
           ['Tracking', 'Spreadsheet o nada', 'TSV + dedup automático'],
           ['Discovery', 'LinkedIn alerts', 'Scanner: portales + careers pages de empresas target'],
-          ['Batch', 'Una a una', '122 URLs en paralelo'],
-          ['Dedup', 'Memoria humana', '680 URLs deduplicadas'],
+          ['Batch', 'Una a una', 'Múltiples URLs en paralelo'],
+          ['Dedup', 'Memoria humana', 'Deduplicación automática'],
         ],
       },
       results: {
         heading: '¿Qué Resultados Ha Conseguido career-ops?',
-        body: 'El resultado más importante: conseguí el trabajo. Ahora soy Head of Applied AI. career-ops evaluó 631 ofertas, generó 354 PDFs personalizados y filtró el ruido para que yo pudiera centrarme en las oportunidades que realmente encajaban.',
+        body: 'El resultado más importante: conseguí el trabajo. Ahora soy Head of Applied AI. career-ops evaluó 740 ofertas, generó CVs personalizados y filtró el ruido para que yo pudiera centrarme en las oportunidades que realmente encajaban.',
         metrics: [
-          { value: '631', label: 'Reports generados' },
+          { value: '740', label: 'Ofertas evaluadas' },
           { value: '62.2K+', label: 'GitHub stars' },
-          { value: '354', label: 'PDFs generados' },
+          { value: '1', label: 'Oferta firmada' },
           { value: '2,600+', label: 'Upvotes r/ClaudeAI' },
         ],
         aftermath: {
@@ -212,7 +212,7 @@ export const careerOpsContent = {
             { value: '4', label: 'Idiomas (EN, FR, ZH, KO)' },
             { value: '6', label: 'Países con cobertura' },
           ],
-          body2: 'Hoy el repositorio supera las 62.2K+ estrellas y 12.2K+ forks, y más de 4.300 personas en Discord se ayudan entre ellas a configurar y adaptar el sistema. Ya no es solo una herramienta: la v1.15 (jun 2026) añadió un sistema de plugins — opt-in, BYO-key, cada plugin revisado y pineado a un commit exacto; 5 de los 6 primeros los construyó la comunidad — y la v1.16 (jul 2026) sumó el pipeline completo de entrevistas: preparación, simulacro con feedback verificado contra tu CV real y debrief post-entrevista. En julio de 2026 entró en GitHub Trending, con picos de más de 400 estrellas en un solo día. Y lo más importante: los primeros miembros de la comunidad ya han documentado ofertas conseguidas con el sistema — un equipo de contratación describió una de esas candidaturas como "the best application they had ever received".',
+          body2: 'Hoy el repositorio supera las 62.2K+ estrellas y 12.2K+ forks, y más de 4.400 personas en Discord se ayudan entre ellas a configurar y adaptar el sistema. Ya no es solo una herramienta: la v1.15 (jun 2026) añadió un sistema de plugins — opt-in, BYO-key, cada plugin revisado y pineado a un commit exacto; 5 de los 6 primeros los construyó la comunidad — y la v1.16 (jul 2026) sumó el pipeline completo de entrevistas: preparación, simulacro con feedback verificado contra tu CV real y debrief post-entrevista. En julio de 2026 entró en GitHub Trending, con picos de más de 400 estrellas en un solo día. Y lo más importante: los primeros miembros de la comunidad ya han documentado ofertas conseguidas con el sistema — un equipo de contratación describió una de esas candidaturas como "the best application they had ever received".',
           manifestoLaunch: {
             intro: 'El 14 de julio de 2026, al cruzar las 60.000 estrellas en GitHub, escribí The CareerOps Manifesto y acuñé la práctica que nombra:',
             definition: "CareerOps is the practice of running a job search the way engineers run production: with evidence, with discipline, and with tools on the candidate's side of the table.",
@@ -237,7 +237,7 @@ export const careerOpsContent = {
         items: [
           {
             title: 'Automatiza el análisis, no la decisión',
-            detail: 'career-ops evalúa 631 ofertas. Yo decido en cuáles invertir tiempo. El HITL no es una limitación — es el diseño. La IA descarta el ruido, el humano aporta el criterio.',
+            detail: 'career-ops evalúa las ofertas. Yo decido en cuáles invertir tiempo. El HITL no es una limitación — es el diseño. La IA descarta el ruido, el humano aporta el criterio.',
           },
           {
             title: 'Los modos son mejores que un prompt largo',
@@ -245,7 +245,7 @@ export const careerOpsContent = {
           },
           {
             title: 'El dedup es más valioso que el scoring',
-            detail: '680 URLs deduplicadas significan 680 evaluaciones que no tuve que repetir. El dedup ahorra más tiempo que cualquier optimización de scoring.',
+            detail: 'Cada URL deduplicada es una evaluación que no tuve que repetir. El dedup ahorra más tiempo que cualquier optimización de scoring.',
           },
           {
             title: 'El CV es un argumento, no un documento',
@@ -253,7 +253,7 @@ export const careerOpsContent = {
           },
           {
             title: 'Batch > secuencial, siempre',
-            detail: 'El modo batch con workers paralelos procesa 122 URLs mientras yo hago otra cosa. La inversión en orquestación paralela se paga en la primera ejecución.',
+            detail: 'El modo batch con workers paralelos procesa la cola entera mientras yo hago otra cosa. La inversión en orquestación paralela se paga en la primera ejecución.',
           },
           {
             title: 'El sistema ES el portfolio',
@@ -279,7 +279,7 @@ export const careerOpsContent = {
         ctaSecondaryLabel: 'Ver el código en GitHub',
         ctaSecondaryHref: 'https://github.com/santifer/career-ops',
         communityHeading: '¿Dudas? Pregunta a la comunidad',
-        communityBody: '4.300+ builders ya usan career-ops y comparten tips, plantillas y configuraciones en Discord.',
+        communityBody: '4.400+ builders ya usan career-ops y comparten tips, plantillas y configuraciones en Discord.',
         communityLabel: 'Únete al Discord',
         communityHref: 'https://discord.gg/8pRpHETxa4',
       },
@@ -289,7 +289,7 @@ export const careerOpsContent = {
       items: [
         {
           q: '¿Esto no es hacer trampa?',
-          a: 'career-ops automatiza el análisis, no la decisión. El embudo real de mi búsqueda en marzo 2026: 631 ofertas evaluadas → 66 aplicaciones enviadas → 12 procesos de entrevistas → 1 oferta firmada (Head of Applied AI). El sistema descartó las 565 que no encajaban; las 66 que sí, las leí una por una antes de aplicar y revisé cada PDF antes de enviarlo. La misma filosofía que un CRM o un IDE: el sistema organiza, el humano decide.',
+          a: 'career-ops automatiza el análisis, no la decisión. El embudo real de mi búsqueda en 2026: 740 ofertas evaluadas → 68 solicitudes enviadas → 12 procesos de entrevistas → 1 oferta firmada (Head of Applied AI). El sistema descartó las que no encajaban; las que sí, las leí una por una antes de aplicar y revisé cada PDF antes de enviarlo. La misma filosofía que un CRM o un IDE: el sistema organiza, el humano decide.',
         },
         {
           q: '¿Por qué Claude Code y no un pipeline de scripts?',
@@ -297,7 +297,7 @@ export const careerOpsContent = {
         },
         {
           q: '¿Cuánto cuesta ejecutar esto?',
-          a: 'Cero coste marginal por evaluación. career-ops corre sobre mi plan Claude Max 20x ($200/mes), que uso para todo: portfolio santifer.io, chatbot LLMOps, artículos del blog, Life OS y career-ops. 631 evaluaciones de ofertas + 354 PDFs ATS-optimized generados sin un solo invoice extra. Con Claude Pro ($20/mes) también funciona para volumen menor — el límite real es la ventana de uso del plan, no el coste por llamada.',
+          a: 'Cero coste marginal por evaluación. career-ops corre sobre mi plan Claude Max 20x ($200/mes), que uso para todo: portfolio santifer.io, chatbot LLMOps, artículos del blog, Life OS y career-ops. Las evaluaciones de ofertas y los PDFs ATS-optimized generados sin un solo invoice extra. Con Claude Pro ($20/mes) también funciona para volumen menor — el límite real es la ventana de uso del plan, no el coste por llamada.',
         },
         {
           q: '¿El modo apply rellena formularios automáticamente?',
@@ -305,7 +305,7 @@ export const careerOpsContent = {
         },
         {
           q: '¿Qué pasa cuando el scanner encuentra una oferta duplicada?',
-          a: 'scan-history.tsv almacena 680 URLs vistas. Dedup por URL exacta + match normalizado de company+role en applications.md. Zero re-evaluaciones.',
+          a: 'scan-history.tsv almacena las URLs ya vistas. Dedup por URL exacta + match normalizado de company+role en applications.md. Zero re-evaluaciones.',
         },
         {
           q: '¿Es replicable?',
@@ -333,7 +333,7 @@ export const careerOpsContent = {
         },
         {
           q: '¿Quién creó career-ops?',
-          a: 'Lo creé yo, Santiago Fernández de Valderrama (santifer). Lo construí para mi propia búsqueda de empleo en IA — después de 16 años fundando y vendiendo un negocio de reparación de móviles. El sistema evaluó 631 ofertas y me ayudó a conseguir mi rol actual como Head of Applied AI. Cuando dejé de necesitarlo, lo publiqué como open source y se hizo viral — hoy supera las 62.2K+ estrellas en GitHub. La comunidad en Discord ya supera las 4.300 personas: discord.gg/8pRpHETxa4',
+          a: 'Lo creé yo, Santiago Fernández de Valderrama (santifer). Lo construí para mi propia búsqueda de empleo en IA — después de 16 años fundando y vendiendo un negocio de reparación de móviles. El sistema evaluó 740 ofertas y me ayudó a conseguir mi rol actual como Head of Applied AI. Cuando dejé de necesitarlo, lo publiqué como open source y se hizo viral — hoy supera las 62.2K+ estrellas en GitHub. La comunidad en Discord ya supera las 4.400 personas: discord.gg/8pRpHETxa4',
         },
       ],
     },
@@ -344,7 +344,7 @@ export const careerOpsContent = {
     readingTime: '18 min read',
     seo: {
       title: 'career-ops: How I Built My Own AI Job Search Tool',
-      description: 'Case study: AI job search tool built as a multi-agent system. AI resume builder, multi-dimensional scoring, automated applications with HITL. 631 evaluations.',
+      description: 'Case study: AI job search tool built as a multi-agent system. AI resume builder, multi-dimensional scoring, automated applications with HITL.',
     },
     nav: {
       breadcrumbHome: 'Home',
@@ -358,13 +358,13 @@ export const careerOpsContent = {
       date: 'Mar 17, 2026',
     },
     heroMetrics: [
-      { value: '631', label: 'Evaluations' },
-      { value: '302', label: 'Apps processed' },
+      { value: '740', label: 'Offers evaluated' },
+      { value: '68', label: 'Applications sent' },
       { value: '12', label: 'Modes' },
-      { value: '1.0–5.0', label: 'Escala del Global' },
-      { value: '680', label: 'URLs deduped' },
+      { value: '1.0–5.0', label: 'Global score scale' },
+      { value: '1', label: 'Signed offer' },
     ],
-    tldr: 'A multi-agent system built with Claude Code that automates the job search: scores offers multi-dimensional with a 1.0–5.0 Global score, generates ATS-optimized PDFs per offer, fills forms via Playwright, and batch-processes with parallel workers. HITL design: AI analyzes, I decide. Open source under MIT — 62.2K+ stars, 4,300+ on Discord.',
+    tldr: 'A multi-agent system built with Claude Code that automates the job search: scores offers multi-dimensional with a 1.0–5.0 Global score, generates ATS-optimized PDFs per offer, fills forms via Playwright, and batch-processes with parallel workers. HITL design: AI analyzes, I decide. Open source under MIT — 62.2K+ stars, 4,400+ on Discord.',
     starChart: {
       alt: 'The career-ops warp chart — 0 to 62.2K+ GitHub stars, live',
       caption: 'The career-ops warp chart, warpcharted in real time by',
@@ -398,7 +398,7 @@ export const careerOpsContent = {
     sections: {
       intro: {
         hook: 'I built an AI system to search for a job. It worked — I am now Head of Applied AI. Then I published it on GitHub and it exploded: 62.2K+ stars, viral, articles in France, China, and Korea. Week one of my AI job search was all manual. By week two I had stopped applying — I was building career-ops.',
-        body: '631 evaluations later, career-ops was filtering better than I was. An AI-powered job search tool built as a multi-agent system: reads job descriptions, scores them multi-dimensional, generates personalized resumes, and prepares applications. I reviewed and decided. The AI did the analytical work. The system demonstrated exactly the competencies the target roles required — and that did not go unnoticed.',
+        body: 'Hundreds of evaluations later, career-ops was filtering better than I was. An AI-powered job search tool built as a multi-agent system: reads job descriptions, scores them multi-dimensional, generates personalized resumes, and prepares applications. I reviewed and decided. The AI did the analytical work. The system demonstrated exactly the competencies the target roles required — and that did not go unnoticed.',
       },
       theProblem: {
         heading: 'Why Did I Need to Automate My Job Search?',
@@ -431,7 +431,7 @@ export const careerOpsContent = {
           { name: 'pdf', desc: 'ATS-optimized PDF personalized per offer with proof points and keywords.' },
           { name: 'pipeline', desc: 'Batch URL processing from inbox.' },
           { name: 'scan', desc: 'Offer discovery: navigates job boards and careers pages of target companies. Many offers never appear on aggregators.' },
-          { name: 'batch', desc: 'Parallel processing with conductor + workers. 122 simultaneous URLs in queue.' },
+          { name: 'batch', desc: 'Parallel processing with conductor + workers: multiple URLs queued simultaneously.' },
           { name: 'apply', desc: 'Interactive form-filling with Playwright. Reads the page, retrieves cached evaluation, generates responses.' },
           { name: 'contacto', desc: 'LinkedIn outreach helper.' },
           { name: 'deep', desc: 'Deep company research.' },
@@ -478,13 +478,13 @@ export const careerOpsContent = {
           { label: 'Generate report.', detail: 'Markdown with 6 blocks: executive summary, CV match, level, compensation, personalization, and interview probability.' },
           { label: 'Generate PDF.', detail: 'HTML template + keyword injection + adaptive framing. Puppeteer renders to PDF.' },
           { label: 'Register tracker.', detail: 'TSV with company, role, score, grade, URL. Auto-merge via Node.js script.' },
-          { label: 'Dedup.', detail: 'Checks scan-history.tsv (680 URLs) and applications.md. Zero re-evaluations.' },
+          { label: 'Dedup.', detail: 'Checks scan-history.tsv and applications.md. Zero re-evaluations.' },
         ],
         batch: {
           heading: 'Batch Processing',
           body: 'For high volume, batch mode launches a conductor that orchestrates parallel workers. Each worker is an independent Claude Code process with 200K context. The conductor manages the queue, tracks progress, and merges results.',
           metrics: [
-            { value: '122', label: 'URLs in queue' },
+            { value: '8', label: 'Parallel workers' },
             { value: '200K', label: 'Context/worker' },
             { value: '2x', label: 'Retries per failure' },
           ],
@@ -526,17 +526,17 @@ export const careerOpsContent = {
           ['Application', 'Manual form', 'Playwright auto-fill'],
           ['Tracking', 'Spreadsheet or nothing', 'TSV + automated dedup'],
           ['Discovery', 'LinkedIn alerts', 'Scanner: job boards + target company careers pages'],
-          ['Batch', 'One at a time', '122 URLs in parallel'],
-          ['Dedup', 'Human memory', '680 URLs deduplicated'],
+          ['Batch', 'One at a time', 'Multiple URLs in parallel'],
+          ['Dedup', 'Human memory', 'Automatic deduplication'],
         ],
       },
       results: {
         heading: 'What Results Has career-ops Achieved?',
-        body: 'The most important result: I got the job. I am now Head of Applied AI. career-ops evaluated 631 offers, generated 354 personalized PDFs, and filtered the noise so I could focus on the opportunities that truly fit.',
+        body: 'The most important result: I got the job. I am now Head of Applied AI. career-ops evaluated 740 offers, generated personalized PDFs, and filtered the noise so I could focus on the opportunities that truly fit.',
         metrics: [
-          { value: '631', label: 'Reports generated' },
+          { value: '740', label: 'Offers evaluated' },
           { value: '62.2K+', label: 'GitHub stars' },
-          { value: '354', label: 'PDFs generated' },
+          { value: '1', label: 'Signed offer' },
           { value: '2,600+', label: 'Upvotes r/ClaudeAI' },
         ],
         aftermath: {
@@ -549,7 +549,7 @@ export const careerOpsContent = {
             { value: '4', label: 'Languages (EN, FR, ZH, KO)' },
             { value: '6', label: 'Countries with coverage' },
           ],
-          body2: 'Today the repository has passed 62.2K+ stars and 12.2K+ forks. A community of 4,300+ people formed on Discord, helping each other configure and adapt the system. And it is no longer just a tool: v1.15 (Jun 2026) added a plugin system — opt-in, BYO-key, every plugin reviewed and pinned to an exact commit; 5 of the first 6 were built by the community — and v1.16 (Jul 2026) shipped the full interview pipeline: time-blocked prep, mock interviews with feedback verified against your real CV, and post-interview debriefs. In July 2026 the repo entered GitHub Trending, peaking at 400+ stars in a single day. Most importantly: the first community members have documented landing their own offers with the system — one hiring team described one of those applications as "the best application they had ever received".',
+          body2: 'Today the repository has passed 62.2K+ stars and 12.2K+ forks. A community of 4,400+ people formed on Discord, helping each other configure and adapt the system. And it is no longer just a tool: v1.15 (Jun 2026) added a plugin system — opt-in, BYO-key, every plugin reviewed and pinned to an exact commit; 5 of the first 6 were built by the community — and v1.16 (Jul 2026) shipped the full interview pipeline: time-blocked prep, mock interviews with feedback verified against your real CV, and post-interview debriefs. In July 2026 the repo entered GitHub Trending, peaking at 400+ stars in a single day. Most importantly: the first community members have documented landing their own offers with the system — one hiring team described one of those applications as "the best application they had ever received".',
           manifestoLaunch: {
             intro: 'On July 14, 2026, when career-ops crossed 60,000 GitHub stars, I wrote The CareerOps Manifesto and coined the practice it names:',
             definition: "CareerOps is the practice of running a job search the way engineers run production: with evidence, with discipline, and with tools on the candidate's side of the table.",
@@ -574,7 +574,7 @@ export const careerOpsContent = {
         items: [
           {
             title: 'Automate analysis, not decisions',
-            detail: 'career-ops evaluates 631 offers. I decide which ones get my time. HITL is not a limitation — it is the design. AI filters noise, humans provide judgment.',
+            detail: 'career-ops evaluates the offers. I decide which ones get my time. HITL is not a limitation — it is the design. AI filters noise, humans provide judgment.',
           },
           {
             title: 'Modes beat a long prompt',
@@ -582,7 +582,7 @@ export const careerOpsContent = {
           },
           {
             title: 'Dedup is more valuable than scoring',
-            detail: '680 deduplicated URLs mean 680 evaluations I never had to repeat. Dedup saves more time than any scoring optimization.',
+            detail: 'Every deduplicated URL is an evaluation I never had to repeat. Dedup saves more time than any scoring optimization.',
           },
           {
             title: 'A CV is an argument, not a document',
@@ -590,7 +590,7 @@ export const careerOpsContent = {
           },
           {
             title: 'Batch over sequential, always',
-            detail: 'Batch mode with parallel workers processes 122 URLs while I do something else. The investment in parallel orchestration pays off on the first run.',
+            detail: 'Batch mode with parallel workers processes the whole queue while I do something else. The investment in parallel orchestration pays off on the first run.',
           },
           {
             title: 'The system IS the portfolio',
@@ -616,7 +616,7 @@ export const careerOpsContent = {
         ctaSecondaryLabel: 'View source on GitHub',
         ctaSecondaryHref: 'https://github.com/santifer/career-ops',
         communityHeading: 'Got questions? Ask the community',
-        communityBody: '4,300+ builders already use career-ops and share tips, templates, and setups on Discord.',
+        communityBody: '4,400+ builders already use career-ops and share tips, templates, and setups on Discord.',
         communityLabel: 'Join Discord',
         communityHref: 'https://discord.gg/8pRpHETxa4',
       },
@@ -626,7 +626,7 @@ export const careerOpsContent = {
       items: [
         {
           q: 'Is this gaming the system?',
-          a: 'career-ops automates analysis, not decisions. Real funnel from my March 2026 search: 631 listings evaluated → 66 applications sent → 12 interview processes → 1 offer signed (Head of Applied AI). The system discarded the 565 that did not fit; the 66 that did, I read one by one before applying and reviewed every PDF before sending. Same philosophy as a CRM or an IDE: the system organizes, the human decides.',
+          a: 'career-ops automates analysis, not decisions. Real funnel from my 2026 search: 740 listings evaluated → 68 applications sent → 12 interview processes → 1 offer signed (Head of Applied AI). The system discarded the ones that did not fit; the ones that did, I read one by one before applying and reviewed every PDF before sending. Same philosophy as a CRM or an IDE: the system organizes, the human decides.',
         },
         {
           q: 'Why Claude Code and not a script pipeline?',
@@ -634,7 +634,7 @@ export const careerOpsContent = {
         },
         {
           q: 'What does it cost to run?',
-          a: 'Zero marginal cost per evaluation. career-ops runs on my Claude Max 20x plan ($200/mo), which I use for everything: portfolio santifer.io, LLMOps chatbot, blog articles, Life OS, and career-ops. 631 listing evaluations + 354 ATS-optimized PDFs generated without a single extra invoice. With Claude Pro ($20/mo) it also works for lower volume — the real limit is the plan usage window, not per-call cost.',
+          a: 'Zero marginal cost per evaluation. career-ops runs on my Claude Max 20x plan ($200/mo), which I use for everything: portfolio santifer.io, LLMOps chatbot, blog articles, Life OS, and career-ops. The listing evaluations and ATS-optimized PDFs generated without a single extra invoice. With Claude Pro ($20/mo) it also works for lower volume — the real limit is the plan usage window, not per-call cost.',
         },
         {
           q: 'Does the apply mode fill forms automatically?',
@@ -642,7 +642,7 @@ export const careerOpsContent = {
         },
         {
           q: 'What happens when the scanner finds a duplicate?',
-          a: 'scan-history.tsv stores 680 seen URLs. Dedup by exact URL match plus normalized company+role match against applications.md. Zero re-evaluations.',
+          a: 'scan-history.tsv stores the URLs already seen. Dedup by exact URL match plus normalized company+role match against applications.md. Zero re-evaluations.',
         },
         {
           q: 'Is it replicable?',
@@ -670,7 +670,7 @@ export const careerOpsContent = {
         },
         {
           q: 'Who created career-ops?',
-          a: 'I did — Santiago Fernández de Valderrama (santifer). I built it for my own AI job search after spending 16 years founding and selling a phone repair business. The system evaluated 631 offers and helped me land my current role as Head of Applied AI. When I no longer needed it, I published it as open source and it went viral — today it has passed 62.2K+ GitHub stars. The Discord community is now 4,300+ people: discord.gg/8pRpHETxa4',
+          a: 'I did — Santiago Fernández de Valderrama (santifer). I built it for my own AI job search after spending 16 years founding and selling a phone repair business. The system evaluated 740 offers and helped me land my current role as Head of Applied AI. When I no longer needed it, I published it as open source and it went viral — today it has passed 62.2K+ GitHub stars. The Discord community is now 4,400+ people: discord.gg/8pRpHETxa4',
         },
       ],
     },

@@ -54,7 +54,7 @@ export const storyContent = {
         paras: [
           'Cuando dejé de necesitarlo, lo liberé bajo licencia MIT: sin paywall, sin tier premium, gratis. Lo dije entonces en Business Insider y lo mantengo: no me sentía cómodo cobrando a gente que busca trabajo, porque encontrar trabajo es una necesidad básica.',
           // Hito verificado congelado (fuente: tweet fijado x.com/santifer/status/2041403685696053741, citado en ai-agent-fleet); contadores 60.8K+/12.0K+/4.200+ VIVOS
-          'Se hizo viral: más de 12.000 estrellas en los dos primeros días. Hoy career-ops tiene 62.2K+ estrellas en GitHub (a julio de 2026), 12.2K+ forks, más de 180 contribuidores y una comunidad en Discord de 4.300+ miembros. Business Insider (abril 2026) y WIRED Grecia (abril 2026) lo cubrieron como caso de cómo la IA está reequilibrando el embudo de contratación desde el lado del candidato.',
+          'Se hizo viral: más de 12.000 estrellas en los dos primeros días. Hoy career-ops tiene 62.2K+ estrellas en GitHub (a julio de 2026), 12.2K+ forks, más de 180 contribuidores y una comunidad en Discord de 4.400+ miembros. Business Insider (abril 2026) y WIRED Grecia (abril 2026) lo cubrieron como caso de cómo la IA está reequilibrando el embudo de contratación desde el lado del candidato.',
         ],
       },
       'the-reversal': {
@@ -147,7 +147,7 @@ export const storyContent = {
         paras: [
           'When I stopped needing it, I released it under the MIT license: no paywall, no premium tier, free. I said it in Business Insider then and I stand by it: I did not feel comfortable charging people who are looking for work, because finding a job is a basic human need.',
           // Frozen verified milestone (source: pinned tweet x.com/santifer/status/2041403685696053741, cited in ai-agent-fleet); 60.8K+/12.0K+/4,200+ counters LIVE
-          'It went viral: 12,000+ stars in the first two days. Today career-ops has 62.2K+ GitHub stars (as of July 2026), 12.2K+ forks, 180+ contributors and a Discord community of 4,300+ members. Business Insider (April 2026) and WIRED Greece (April 2026) covered it as a case of AI rebalancing the hiring funnel from the candidate side.',
+          'It went viral: 12,000+ stars in the first two days. Today career-ops has 62.2K+ GitHub stars (as of July 2026), 12.2K+ forks, 180+ contributors and a Discord community of 4,400+ members. Business Insider (April 2026) and WIRED Greece (April 2026) covered it as a case of AI rebalancing the hiring funnel from the candidate side.',
         ],
       },
       'the-reversal': {
