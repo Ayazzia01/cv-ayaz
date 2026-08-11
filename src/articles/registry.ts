@@ -491,11 +491,11 @@ export const articleRegistry: ArticleConfig[] = [
     seo: {
       es: {
         title: 'career-ops: Agente IA que Automatiza Mi Búsqueda de Empleo',
-        description: 'Case study: agente IA multi-agente que evalúa ofertas con scoring multi-dimensional, crea CV con IA personalizados y automatiza aplicaciones. 631 evaluaciones.',
+        description: 'Case study: agente IA multi-agente que evalúa ofertas con scoring multi-dimensional, crea CV con IA personalizados y automatiza aplicaciones. 740 ofertas evaluadas.',
       },
       en: {
         title: 'career-ops: How I Built My Own AI Job Search Tool',
-        description: 'Case study: AI job search tool built as a multi-agent system. AI resume builder, multi-dimensional scoring, automated applications with HITL. 631 evaluations.',
+        description: 'Case study: AI job search tool built as a multi-agent system. AI resume builder, multi-dimensional scoring, automated applications with HITL. 740 offers evaluated.',
       },
     },
     sectionLabels: {
@@ -532,7 +532,7 @@ export const articleRegistry: ArticleConfig[] = [
     component: () => import('../CareerOps.tsx'),
     seoMeta: {
       datePublished: '2026-03-17',
-      dateModified: '2026-07-30',
+      dateModified: '2026-08-11',
       keywords: ['ai job search', 'ai job search tool', 'ai powered job search', 'ai resume builder', 'ai resume', 'multi agent system', 'multi agent orchestration', 'automated job application', 'ATS-optimized resume', 'Claude Code', 'batch processing', 'HITL', 'job search automation', 'career-ops', 'ai auto apply', 'agente ia', 'crear cv con ia', 'automatizacion con ia', 'sistema multiagente', 'busqueda de empleo ia'],
       articleType: 'TechArticle',
       articleTags: 'multi-agent,job search,Claude Code,ATS,batch processing,HITL,automation,Playwright',
@@ -638,7 +638,7 @@ export const articleRegistry: ArticleConfig[] = [
     component: () => import('../AiAgentFleet.tsx'),
     seoMeta: {
       datePublished: '2026-07-10',
-      dateModified: '2026-07-30',
+      dateModified: '2026-08-11',
       keywords: ['agentic maintenance', 'ai agent fleet', 'maintain open source with ai agents', 'multi-agent code review', 'ai-native sdlc', 'context engineering', 'claude code agents', 'open source maintainer', 'ai agents software maintenance', 'multi-agent orchestration', 'orchestrator agent pattern', 'ephemeral verifier', 'flota de agentes ia', 'mantener open source con agentes ia', 'agentes claude code'],
       articleType: 'TechArticle',
       articleTags: 'ai agents,multi-agent,open source,maintainer,Claude Code,sdlc,context engineering',
@@ -706,7 +706,7 @@ export const articleRegistry: ArticleConfig[] = [
     xDefaultSlug: 'historia',
     seoMeta: {
       datePublished: '2026-07-21',
-      dateModified: '2026-07-30',
+      dateModified: '2026-08-11',
       keywords: ['santiago open source job hunt', 'career ops by santiago', 'santiago fernandez career ops', 'career-ops story', 'ai job search story', 'operated pipeline job search', 'building in public', 'open source job search', 'hired without applying', 'the reversal', 'historia career-ops', 'busqueda de empleo como pipeline'],
       articleType: 'Article',
       articleTags: 'career-ops,open source,job search,building in public,origin story',
