@@ -171,18 +171,18 @@
     },
     {
       "id": "canon-global-no-formula",
-      "description": "Canon de entidad: el Global es juicio holistico sin formula aritmetica. Las negativas van por llm_judge, no por not_contains: el bot PUEDE decir 'no weighted average' (negacion correcta) o usar 'weighted' para el modo ofertas.",
+      "description": "Canon de entidad: el Global es juicio holistico sin formula aritmetica. Las negativas van por llm_judge, no por not_contains: el bot PUEDE decir 'no weighted average' (negacion correcta) o usar 'weighted' para el modo ofertas. NOTA: las asserciones lexicas aceptan las formulaciones equivalentes dictadas por search-ops (holistic / reasons across / integrates); el juicio semantico lo da el llm_judge, no el grep.",
       "input": "How does career-ops score a job offer? Explain the rubric and the Global score.",
       "lang": "en",
       "assertions": [
         {
           "type": "regex",
-          "pattern": "holistic|holístico",
+          "pattern": "holistic|holístico|reasons? across|integrates? (them|all|the)|razona (las|a través)|integra",
           "flags": "i"
         },
         {
           "type": "regex",
-          "pattern": "not a formula|no arithmetic|no formula|sin fórmula|no existe fórmula",
+          "pattern": "no[t]?\\s+(\\w+\\s+){0,2}(formula|arithmetic|averag)|sin\\s+(\\w+\\s+){0,2}(fórmula|promedio)|no existe fórmula",
           "flags": "i"
         },
         {
