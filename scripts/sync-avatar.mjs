@@ -58,15 +58,37 @@ async function syncAvatar() {
 
     browser = await chromium.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled'],
+      channel: 'chromium',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-dev-shm-usage',
+        '--disable-web-security',
+        '--no-first-run',
+        '--no-default-browser-check',
+      ],
     })
 
     const context = await browser.newContext({
-      viewport: { width: 1280, height: 800 },
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      viewport: { width: 1366, height: 768 },
+      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      locale: 'en-US',
+      timezoneId: 'America/New_York',
       extraHTTPHeaders: {
         'Accept-Language': 'en-US,en;q=0.9',
+        'Sec-Ch-Ua': '"Chromium";v="131", "Not_A Brand";v="24"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Linux"',
       },
+    })
+
+    // Stealth: override navigator properties to avoid headless detection
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined })
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] })
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] })
+      window.chrome = { runtime: {} }
     })
 
     let cookies
@@ -108,13 +130,16 @@ async function syncAvatar() {
 
   async function runSync(page) {
     console.log(`[sync-avatar] Navigating to ${LINKEDIN_URL}...`)
-    await page.goto(LINKEDIN_URL, { waitUntil: 'domcontentloaded', timeout: 30000 })
+    await page.goto(LINKEDIN_URL, { waitUntil: 'networkidle', timeout: 45000 })
 
     const currentUrl = page.url()
-    if (currentUrl.includes('authwall') || currentUrl.includes('login')) {
+    console.log(`[sync-avatar] Current URL: ${currentUrl}`)
+
+    if (currentUrl.includes('authwall') || currentUrl.includes('login') || currentUrl.includes('signup')) {
       if (isCI) {
         console.error('[sync-avatar] LinkedIn requires login. Cookies may be expired.')
         console.error('[sync-avatar] Update the LINKEDIN_COOKIES GitHub secret with fresh cookies.')
+        console.error('[sync-avatar] Page title:', await page.title())
         process.exit(1)
       } else {
         console.log('')
@@ -126,35 +151,63 @@ async function syncAvatar() {
       }
     }
 
-    await page.waitForTimeout(isCI ? 5000 : 3000)
+    // Wait for page to fully render
+    await page.waitForTimeout(isCI ? 8000 : 3000)
 
-    const profilePhotoSelector = [
+    // Try multiple selectors with retry
+    const selectors = [
       '.pv-top-card__photo img',
-      'button[aria-label*="Profile photo"]',
+      'button[aria-label*="Profile photo"] img',
       '.profile-photo-edit__preview',
       'img[src*="profile-displayphoto"]',
-    ].join(', ')
+      '.pv-top-card-profile-picture img',
+      'div[class*="profile-photo"] img',
+    ]
 
-    let photoEl = await page.$(profilePhotoSelector)
+    let photoEl = null
+
+    // Try each selector with a short wait
+    for (const sel of selectors) {
+      try {
+        photoEl = await page.waitForSelector(sel, { timeout: 5000, state: 'visible' })
+        if (photoEl) {
+          console.log(`[sync-avatar] Found photo with selector: ${sel}`)
+          break
+        }
+      } catch {
+        // continue to next selector
+      }
+    }
 
     if (!photoEl) {
-      console.log('[sync-avatar] Profile photo element not found directly. Trying alternative approach...')
-      const allImgs = await page.$$eval('img[src*="licdn"]', els =>
-        els.filter(e => e.width > 50 && e.height > 50 && e.src.includes('profile-displayphoto'))
+      console.log('[sync-avatar] Direct selectors failed. Scanning all images...')
+      const allImgs = await page.$$eval('img', els =>
+        els.filter(e => e.src && e.src.includes('profile-displayphoto'))
            .map(e => ({ src: e.src, w: e.width, h: e.height }))
       )
       if (allImgs.length > 0) {
-        photoEl = await page.$(`img[src="${allImgs[0].src}"]`)
+        console.log(`[sync-avatar] Found ${allImgs.length} profile-displayphoto images`)
+        // Get the largest one
+        const best = allImgs.sort((a, b) => b.w * b.h - a.w * a.h)[0]
+        photoEl = await page.$(`img[src="${best.src}"]`)
       }
     }
 
     if (!photoEl) {
       console.error('[sync-avatar] Could not find profile photo element.')
-      if (!isCI) {
+      console.error('[sync-avatar] Page title:', await page.title())
+      // Take a debug screenshot in CI
+      if (isCI) {
+        await page.screenshot({ path: 'debug-page.png', fullPage: false })
+        console.error('[sync-avatar] Debug screenshot saved to debug-page.png')
+        // List all images on the page
         const imgs = await page.$$eval('img', els =>
-          els.filter(e => e.src && e.width > 50).map(e => ({ src: e.src.slice(0, 100), w: e.width, h: e.height, alt: e.alt }))
+          els.map(e => ({ src: e.src?.slice(0, 100), w: e.naturalWidth, h: e.naturalHeight, alt: e.alt?.slice(0, 50) }))
         )
-        console.error('[sync-avatar] Available images:', JSON.stringify(imgs.slice(0, 10), null, 2))
+        console.error('[sync-avatar] All images on page:', JSON.stringify(imgs.slice(0, 15), null, 2))
+      }
+      process.exit(1)
+    }
       }
       process.exit(1)
     }
