@@ -208,9 +208,6 @@ async function syncAvatar() {
       }
       process.exit(1)
     }
-      }
-      process.exit(1)
-    }
 
     console.log('[sync-avatar] Taking screenshot of profile photo...')
     await photoEl.screenshot({ path: TEMP_SCREENSHOT, type: 'png' })
