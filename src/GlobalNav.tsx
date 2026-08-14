@@ -8,7 +8,7 @@ import { getPageTitles, getSectionLabels } from './articles/registry'
  *
  * The translucent bar is a "contextual message container" that appears
  * when there's something to communicate:
- * - Inner pages: permanent "← santifer.io" back link
+ * - Inner pages: permanent "← ayaz.dev" back link
  * - Any page: temporary language suggestion when browser lang ≠ page lang
  *
  * Language suggestion is right-aligned, next to the lang pill, reinforcing

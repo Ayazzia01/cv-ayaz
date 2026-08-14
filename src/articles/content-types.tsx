@@ -1019,7 +1019,7 @@ export function StoryBridge({ lines, className, editorId }: StoryBridgeProps) {
 }
 
 // ---------------------------------------------------------------------------
-// 17. ScreenshotGrid + ScreenshotCaption (moved from JacoboAgent)
+// 17. ScreenshotGrid + ScreenshotCaption
 // ---------------------------------------------------------------------------
 
 function ScreenshotFigure({ src, alt, summaryEn, lang, width, height, className }: { src: string; alt: string; summaryEn: string; lang: 'es' | 'en'; width?: number; height?: number; className?: string }) {

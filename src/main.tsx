@@ -1,23 +1,14 @@
-import { StrictMode, lazy, Suspense, useState, useEffect, useRef, Component, type ReactNode, type ComponentType, type LazyExoticComponent } from 'react'
+import { StrictMode, lazy, Suspense, useState, useEffect, useRef, Component, type ReactNode } from 'react'
 import { hydrateRoot, createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.tsx'
 import GlobalNav from './GlobalNav.tsx'
-import { articleRegistry } from './articles/registry'
 
 const FloatingChat = lazy(() => import('./FloatingChat'))
 const MusicToggle = lazy(() => import('./MusicToggle'))
 const OpsDashboard = lazy(() => import('./ops/OpsDashboard'))
-const PrivacyPolicy = lazy(() => import('./PrivacyPolicy'))
-const AboutPage = lazy(() => import('./AboutPage'))
-
-// Lazy-load article components from registry
-const articleComponents: Record<string, LazyExoticComponent<ComponentType<{ lang: 'en' }>>> = {}
-for (const article of articleRegistry) {
-  articleComponents[article.id] = lazy(article.component) as LazyExoticComponent<ComponentType<{ lang: 'en' }>>
-}
 
 class ChatErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false }
@@ -165,14 +156,6 @@ const app = (
             <Route path="/" element={<App />} />
             <Route path="/en" element={<App />} />
             <Route path="/ops" element={<OpsDashboard />} />
-            <Route path="/about" element={<AboutPage lang="en" />} />
-            <Route path="/privacy" element={<PrivacyPolicy lang="en" />} />
-            {articleRegistry.map((article) => {
-              const ArticleComponent = articleComponents[article.id]
-              return (
-                <Route key={`${article.id}-en`} path={`/${article.slugs.en}`} element={<ArticleComponent lang="en" />} />
-              )
-            })}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

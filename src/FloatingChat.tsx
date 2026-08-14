@@ -95,7 +95,7 @@ function linkifyUrls(text: string): string {
   return fixed;
 }
 
-const STORAGE_KEY = 'santi-chat';
+const STORAGE_KEY = 'ayaz-chat';
 
 function loadSession(fallbackGreeting: string): { messages: Message[]; sessionId: string; showPrompts: boolean } {
   try {
@@ -528,9 +528,9 @@ export default function FloatingChat({ lang }: FloatingChatProps) {
             >
               {/* Avatar */}
               <picture>
-                <source srcSet="/foto-avatar-sm.webp" type="image/webp" />
+                <source srcSet="/ayaz-avatar.png" type="image/webp" />
                 <img
-                  src="/foto-avatar-sm.webp"
+                  src="/ayaz-avatar.png"
                   alt="Chat with Ayaz"
                   className="w-full h-full rounded-full object-cover"
                   width={56}
@@ -586,10 +586,10 @@ export default function FloatingChat({ lang }: FloatingChatProps) {
             >
               <div className="flex items-center gap-3">
                 <picture>
-                  <source srcSet="/foto-avatar-sm.webp" type="image/webp" />
+                  <source srcSet="/ayaz-avatar.png" type="image/webp" />
                   <img
-                    src="/foto-avatar-sm.webp"
-                    alt="santifer avatar"
+                    src="/ayaz-avatar.png"
+                    alt="Ayaz avatar"
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20"
                     width={40}
                     height={40}

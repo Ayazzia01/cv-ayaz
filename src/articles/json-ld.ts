@@ -66,42 +66,28 @@ interface JsonLdOptions {
 
 const PERSON = {
   '@type': 'Person',
-  '@id': 'https://santifer.io/#person',
-  name: 'Santiago Fernández de Valderrama Aparicio',
-  alternateName: ['Santiago Fernández de Valderrama', 'santifer', 'Santi'],
-  url: 'https://santifer.io',
-  description: "Santiago Fernández de Valderrama is a software engineer specializing in multi-agent AI systems and agentic adoption. He created career-ops, an open-source project maintained by an orchestrated fleet of AI agents, and coined 'agentic maintenance': gated, evidence-based upkeep of a living codebase, sustained by a fleet of AI agents under human direction.",
-  jobTitle: ['AI Forward Deployed Engineer', 'Applied AI Engineer', 'Multi-Agent Systems Engineer', 'Agentic AI Engineer', 'Head of Applied AI', 'Solutions Architect (No/Low-Code & AI)', 'AI Product Manager'],
+  '@id': 'https://cv-ayaz.vercel.app/#person',
+  name: 'Ayaz Zia Ansari',
+  alternateName: ['Ayaz Zia Ansari', 'Ayaz'],
+  url: 'https://cv-ayaz.vercel.app',
+  description: "AI/ML engineer with hands-on experience across the full model lifecycle — from research and fine-tuning to deployment and operationalisation. Published researcher; DAAD WISE research scholar.",
+  jobTitle: ['AI Engineer', 'ML Engineer', 'Computer Vision Engineer'],
   sameAs: [
-    'https://www.linkedin.com/in/santifer',
-    'https://github.com/santifer',
-    'https://x.com/santifer',
-    'https://dev.to/santifer',
-    'https://santifer.substack.com',
-    'https://contentdigest.santifer.io',
-    'https://www.youtube.com/@santifer_io',
-    'https://stackoverflow.com/users/32541743',
-    'https://orcid.org/0009-0006-2192-7210',
-    'https://www.crunchbase.com/person/santiago-fernandez-de-valderrama',
-    'https://huggingface.co/santifer',
-    'https://www.wikidata.org/wiki/Q138710224',
-    'https://santiferirepair.es',
-    'https://career-ops.org/about',
-    'https://www.facebook.com/santifer.io/',
-    'https://www.producthunt.com/@santifer',
-    'https://app.daily.dev/santifer',
+    'https://www.linkedin.com/in/ayazziaansari',
+    'https://github.com/Ayazzia01',
+    'https://scholar.google.com/citations?user=i8lxFo8AAAAJ',
   ],
 }
 
 const WEBSITE = {
   '@type': 'WebSite',
-  '@id': 'https://santifer.io/#website',
-  name: 'santifer.io',
-  url: 'https://santifer.io',
+  '@id': 'https://cv-ayaz.vercel.app/#website',
+  name: 'Ayaz Zia Ansari',
+  url: 'https://cv-ayaz.vercel.app',
 }
 
 export function buildArticleJsonLd(opts: JsonLdOptions) {
-  const inLanguage = opts.lang === 'es' ? 'es' : 'en'
+  const inLanguage = 'en'
 
   const graph: Record<string, unknown>[] = [
     {
@@ -110,12 +96,11 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       headline: opts.headline,
       alternativeHeadline: opts.alternativeHeadline,
       description: opts.description,
-      author: { '@id': 'https://santifer.io/#person' },
+      author: { '@id': 'https://cv-ayaz.vercel.app/#person' },
       // Publisher: Person-as-publisher is valid for CreativeWork on personal sites
-      // (Santiago publishes on his own domain). Override only for collabs (e.g. Marily).
       publisher: opts.publisher
         ? { '@type': 'Organization', name: opts.publisher.name, url: opts.publisher.url }
-        : { '@id': 'https://santifer.io/#person' },
+        : { '@id': 'https://cv-ayaz.vercel.app/#person' },
       datePublished: opts.datePublished,
       dateModified: opts.dateModified,
       keywords: opts.keywords,
@@ -123,7 +108,7 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       mainEntityOfPage: opts.url,
       image: opts.images,
       inLanguage,
-      isPartOf: { '@id': 'https://santifer.io/#website' },
+      isPartOf: { '@id': 'https://cv-ayaz.vercel.app/#website' },
       ...(opts.about ? { about: opts.about } : {}),
       ...(opts.extra || {}),
       ...(opts.citation ? { citation: opts.citation } : {}),
@@ -141,7 +126,7 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       '@type': 'BreadcrumbList',
       '@id': `${opts.url}/#breadcrumbs`,
       itemListElement: [
-        { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-1`, position: 1, name: opts.breadcrumbHome, item: 'https://santifer.io' },
+        { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-1`, position: 1, name: opts.breadcrumbHome, item: 'https://cv-ayaz.vercel.app' },
         { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-2`, position: 2, name: opts.breadcrumbCurrent, item: opts.url },
       ],
     },
@@ -183,8 +168,8 @@ export function buildJsonLdFromRegistry(
   const meta = config.seoMeta
   return buildArticleJsonLd({
     lang,
-    url: `https://santifer.io/${i18n.slug}`,
-    altUrl: `https://santifer.io/${i18n.altSlug}`,
+    url: `https://cv-ayaz.vercel.app/${i18n.slug}`,
+    altUrl: `https://cv-ayaz.vercel.app/${i18n.altSlug}`,
     headline: i18n.header.h1,
     alternativeHeadline: i18n.seo.title,
     description: i18n.seo.description,

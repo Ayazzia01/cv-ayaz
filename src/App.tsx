@@ -1349,8 +1349,8 @@ function App() {
                 <div className="absolute inset-0 rounded-full bg-gradient-theme-30 blur-xl" />
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-white/5 md:backdrop-blur-sm border border-white/20 shadow-2xl" />
                 <div className="absolute inset-2 rounded-full bg-gradient-theme-50 p-[2px]">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
-                    <span className="text-4xl font-display font-bold text-gradient-theme">A</span>
+                  <div className="w-full h-full rounded-full overflow-hidden">
+                    <img src="/ayaz-avatar.png" alt="Ayaz Zia Ansari" className="w-full h-full object-cover" width={192} height={192} fetchPriority="high" />
                   </div>
                 </div>
               </div>
