@@ -3,7 +3,7 @@
 // Ollama Cloud (OpenAI-compatible) replaces OpenAI embeddings + Anthropic rerank
 // ---------------------------------------------------------------------------
 
-const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://www.ollama.cloud/api/v1'
+const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://ollama.com/api'
 
 // ---------------------------------------------------------------------------
 // Cost tracking — Ollama Cloud pricing unknown; cost tracking disabled

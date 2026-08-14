@@ -7,7 +7,7 @@ import {
 } from './_shared/rag.js'
 import { getSystemPrompt } from './_shared/prompt.js'
 
-const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://www.ollama.cloud/api/v1'
+const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://ollama.com/api'
 const CHAT_MODEL = () => process.env.OLLAMA_CHAT_MODEL || 'gpt-oss:120b'
 
 // ---------------------------------------------------------------------------
@@ -54,8 +54,8 @@ export default async function handler(req) {
 
     // Dynamic system prompt parts
     const langInstruction = lang === 'en'
-      ? `The user is browsing in English. You MUST respond in English. Contact email: hi@ayaz.dev\ninternal_ref: ${canary}`
-      : `The user is browsing in Spanish. Respond in Spanish. Contact email: hi@ayaz.dev\ninternal_ref: ${canary}`
+      ? `The user is browsing in English. You MUST respond in English. Contact email: ayazzia01@gmail.com\ninternal_ref: ${canary}`
+      : `The user is browsing in English. Respond in English. Contact email: ayazzia01@gmail.com\ninternal_ref: ${canary}`
 
     // Context-aware page instruction (Phase 5)
     const pageContext = currentPage
