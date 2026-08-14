@@ -1,11 +1,6 @@
 // Temporary endpoint to run RAG ingestion on Vercel (where env vars are available)
 // DELETE this file after ingestion is complete
-import { readFileSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
 import { createClient } from '@supabase/supabase-js'
-
-export const config = { runtime: 'edge' }
 
 const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://ollama.com/v1'
 const EMBED_MODEL = () => process.env.OLLAMA_EMBED_MODEL || 'nomic-embed-text'
