@@ -24,14 +24,27 @@ export default async function handler(req) {
     console.log('Model:', EMBED_MODEL())
     console.log('Content length:', content.length)
 
-    const embedRes = await fetch(`${OLLAMA_BASE_URL()}/embeddings`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OLLAMA_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ model: EMBED_MODEL(), input: content }),
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 60000)
+
+    let embedRes
+    try {
+      embedRes = await fetch(`${OLLAMA_BASE_URL()}/embeddings`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OLLAMA_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model: EMBED_MODEL(), input: content }),
+        signal: controller.signal,
+      })
+    } catch (fetchErr) {
+      clearTimeout(timeout)
+      return new Response(JSON.stringify({ error: 'Fetch failed', detail: fetchErr.message, url: `${OLLAMA_BASE_URL()}/embeddings`, model: EMBED_MODEL() }), {
+        status: 500, headers: { 'Content-Type': 'application/json' },
+      })
+    }
+    clearTimeout(timeout)
 
     console.log('Ollama response status:', embedRes.status)
 
