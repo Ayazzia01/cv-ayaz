@@ -20,6 +20,10 @@ export default async function handler(req) {
     await supabase.from('documents').delete().neq('id', 0)
 
     // Single embedding call for the entire content
+    console.log('Calling Ollama embeddings at:', `${OLLAMA_BASE_URL()}/embeddings`)
+    console.log('Model:', EMBED_MODEL())
+    console.log('Content length:', content.length)
+
     const embedRes = await fetch(`${OLLAMA_BASE_URL()}/embeddings`, {
       method: 'POST',
       headers: {
@@ -29,9 +33,12 @@ export default async function handler(req) {
       body: JSON.stringify({ model: EMBED_MODEL(), input: content }),
     })
 
+    console.log('Ollama response status:', embedRes.status)
+
     if (!embedRes.ok) {
       const errText = await embedRes.text()
-      return new Response(JSON.stringify({ error: `Embedding failed: ${embedRes.status}`, detail: errText.slice(0, 300) }), {
+      console.error('Ollama error:', errText.slice(0, 300))
+      return new Response(JSON.stringify({ error: `Embedding failed: ${embedRes.status}`, detail: errText.slice(0, 300), url: `${OLLAMA_BASE_URL()}/embeddings`, model: EMBED_MODEL() }), {
         status: 500, headers: { 'Content-Type': 'application/json' },
       })
     }
