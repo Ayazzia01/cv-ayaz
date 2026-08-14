@@ -71,9 +71,11 @@ async function syncAvatar() {
 
     let cookies
     try {
-      cookies = JSON.parse(process.env.LINKEDIN_COOKIES)
-    } catch {
-      console.error('[sync-avatar] LINKEDIN_COOKIES is not valid JSON')
+      const raw = process.env.LINKEDIN_COOKIES.trim()
+      cookies = JSON.parse(raw)
+    } catch (e) {
+      console.error('[sync-avatar] LINKEDIN_COOKIES is not valid JSON:', e.message)
+      console.error('[sync-avatar] Length:', process.env.LINKEDIN_COOKIES.length, 'First 50 chars:', process.env.LINKEDIN_COOKIES.slice(0, 50))
       process.exit(1)
     }
 
