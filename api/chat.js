@@ -7,7 +7,7 @@ import {
 } from './_shared/rag.js'
 import { getSystemPrompt } from './_shared/prompt.js'
 
-const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://ollama.com/api/v1'
+const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://ollama.com/v1'
 const CHAT_MODEL = () => process.env.OLLAMA_CHAT_MODEL || 'gpt-oss:120b'
 
 // ---------------------------------------------------------------------------
