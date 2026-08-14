@@ -101,6 +101,12 @@ export default async function handler(req) {
       })
 
       const firstData = await firstResponse.json()
+
+      // Debug: log if Ollama response is unexpected
+      if (!firstData.choices) {
+        console.error('Ollama response missing choices:', JSON.stringify(firstData).slice(0, 500))
+        throw new Error(`Ollama API returned no choices. Status: ${firstResponse.status}. Response: ${JSON.stringify(firstData).slice(0, 200)}`)
+      }
       const toolDecisionMs = Date.now() - td0
       const tdInputTokens = firstData.usage?.prompt_tokens || 0
       const tdOutputTokens = firstData.usage?.completion_tokens || 0
