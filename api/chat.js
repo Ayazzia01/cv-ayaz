@@ -217,7 +217,7 @@ export default async function handler(req) {
     })
   } catch (error) {
     console.error('Chat API error:', error)
-    return new Response(JSON.stringify({ error: 'Error processing request' }), {
+    return new Response(JSON.stringify({ error: 'Error processing request', detail: error.message, stack: error.stack?.split('\n').slice(0, 5).join(' | ') }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })
