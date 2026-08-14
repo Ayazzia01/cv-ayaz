@@ -1,79 +1,46 @@
-name: Sync LinkedIn Profile Photo
+name: Avatar Sync
 
 on:
-  schedule:
-    # Every Monday at 04:30 UTC (10:00 IST)
-    - cron: '30 4 * * 1'
   workflow_dispatch:
-    inputs:
-      force:
-        description: 'Force regenerate even if photo unchanged'
-        required: false
-        default: 'false'
-        type: string
+  schedule:
+    - cron: '30 4 * * 1'
 
 permissions:
-  contents: write # Needed to commit + push the updated avatars
-
-concurrency:
-  group: avatar-sync
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  sync-avatar:
+  sync:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium
 
-      - name: Install sharp
-        run: npm install sharp
+      - run: npm install sharp
 
       - name: Sync LinkedIn profile photo
         env:
           CI: 'true'
-          GITHUB_ACTIONS: 'true'
           LINKEDIN_COOKIES: ${{ secrets.LINKEDIN_COOKIES }}
         run: node scripts/sync-avatar.mjs
 
-      - name: Check for changes
-        id: changes
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "[workflow] Changes detected, committing..."
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "[workflow] No changes detected."
-          fi
-
-      - name: Commit and push
-        if: steps.changes.outputs.changed == 'true'
+      - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/ayaz-avatar.png public/favicon-16x16.png public/favicon-32x32.png public/favicon.ico public/apple-touch-icon.png index.html
-          git commit -m "chore: auto-sync LinkedIn profile photo 📸
-
-  Automated by GitHub Actions (weekly Monday 10:00 IST).
-  Source: linkedin.com/in/ayazziaansari"
+          git add public/ayaz-avatar.png public/favicon-*.png public/favicon.ico public/apple-touch-icon.png index.html
+          git diff --staged --quiet || git commit -m "chore: auto-sync LinkedIn profile photo [skip ci]"
           git push
 
-      - name: Create issue on cookie expiry
+      - name: Alert on failure
         if: failure()
         uses: actions/github-script@v7
         with:
@@ -81,19 +48,7 @@ jobs:
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '⚠️ LinkedIn avatar sync failed — cookies may be expired',
-              body: [
-                'The weekly LinkedIn profile photo sync failed.',
-                '',
-                '**Likely cause:** The `LINKEDIN_COOKIES` secret has expired.',
-                '',
-                '**To fix:**',
-                '1. Open LinkedIn in your browser and log in',
-                '2. Extract cookies using a browser extension or DevTools',
-                '3. Update the `LINKEDIN_COOKIES` GitHub secret with fresh cookies',
-                '4. Re-run the workflow manually from the Actions tab',
-                '',
-                `[Run link](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
-              ].join('\n'),
-              labels: ['avatar-sync', 'needs-attention'],
+              title: 'LinkedIn avatar sync failed — cookies may be expired',
+              body: `The weekly avatar sync failed. Update the LINKEDIN_COOKIES secret.\n\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              labels: ['avatar-sync', 'needs-attention']
             })
