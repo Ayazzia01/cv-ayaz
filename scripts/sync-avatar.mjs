@@ -72,10 +72,19 @@ async function syncAvatar() {
     let cookies
     try {
       const raw = process.env.LINKEDIN_COOKIES.trim()
-      cookies = JSON.parse(raw)
+      // Handle both JSON array and newline/whitespace-separated objects
+      if (raw.startsWith('[')) {
+        cookies = JSON.parse(raw)
+      } else if (raw.startsWith('{')) {
+        // Multiple objects separated by whitespace/newlines — wrap in array
+        const wrapped = '[' + raw.replace(/}\s*{/g, '},{') + ']'
+        cookies = JSON.parse(wrapped)
+      } else {
+        cookies = JSON.parse(raw)
+      }
     } catch (e) {
       console.error('[sync-avatar] LINKEDIN_COOKIES is not valid JSON:', e.message)
-      console.error('[sync-avatar] Length:', process.env.LINKEDIN_COOKIES.length, 'First 50 chars:', process.env.LINKEDIN_COOKIES.slice(0, 50))
+      console.error('[sync-avatar] Length:', process.env.LINKEDIN_COOKIES.length, 'First 80 chars:', process.env.LINKEDIN_COOKIES.slice(0, 80))
       process.exit(1)
     }
 
