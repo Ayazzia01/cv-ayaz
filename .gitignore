@@ -25,6 +25,10 @@ dist-ssr
 .vercel
 .env
 .env.local
+# Playwright persistent browser context (contains LinkedIn session)
+browser-data/
+# Temp avatar screenshot
+public/ayaz-avatar-new.png
 # Claude Code (memory, settings, plans, skills — all private)
 CLAUDE.md
 **/CLAUDE.md

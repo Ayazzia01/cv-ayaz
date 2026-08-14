@@ -1,26 +1,25 @@
 /**
  * Sync LinkedIn profile photo → portfolio avatars + favicons.
  *
- * Uses Playwright with a persistent browser context (your real LinkedIn login)
- * to screenshot your profile photo, then generates all required image sizes
- * via sharp-cli and commits the update if the photo changed.
+ * Two modes:
+ *   1. LOCAL (default): launches a headed browser with persistent context
+ *      for manual LinkedIn login. Session persists at ./browser-data.
+ *   2. CI (CI=true): launches headless, injects LinkedIn cookies from
+ *      LINKEDIN_COOKIES env var (JSON array of Playwright cookie objects).
  *
  * Usage:
- *   node scripts/sync-avatar.mjs              # one-shot sync
- *   node scripts/sync-avatar.mjs --check      # check only, no commit
- *   node scripts/sync-avatar.mjs --force      # regenerate even if unchanged
- *
- * Prerequisites:
- *   - npm install (playwright is a devDependency)
- *   - npx playwright install chromium
- *   - You must have logged into LinkedIn at least once in a Chromium browser
- *     using the persistent context at ./browser-data (created automatically
- *     on first run — log in when prompted, the session persists).
+ *   node scripts/sync-avatar.mjs              # local, headed
+ *   node scripts/sync-avatar.mjs --check      # local, check only
+ *   node scripts/sync-avatar.mjs --force      # local, force regenerate
+ *   CI=true node scripts/sync-avatar.mjs      # CI, headless with cookies
  */
 
 import { chromium } from 'playwright'
 import { execSync } from 'child_process'
-import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync, statSync } from 'fs'
+import {
+  existsSync, mkdirSync, readFileSync, writeFileSync,
+  copyFileSync, statSync, rmSync,
+} from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -40,43 +39,83 @@ const SIZES = [
   { name: 'favicon.ico', size: 32 },
 ]
 
+const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true'
+const args = process.argv.slice(2)
+const checkOnly = args.includes('--check')
+const force = args.includes('--force')
+
 async function syncAvatar() {
-  const args = process.argv.slice(2)
-  const checkOnly = args.includes('--check')
-  const force = args.includes('--force')
+  console.log(`[sync-avatar] Mode: ${isCI ? 'CI (headless + cookies)' : 'LOCAL (headed + persistent context)'}`)
 
-  console.log('[sync-avatar] Launching Playwright with persistent context...')
+  let browser
 
-  if (!existsSync(BROWSER_DATA)) {
-    mkdirSync(BROWSER_DATA, { recursive: true })
+  if (isCI) {
+    if (!process.env.LINKEDIN_COOKIES) {
+      console.error('[sync-avatar] CI mode requires LINKEDIN_COOKIES env var')
+      console.error('[sync-avatar] Set it as a GitHub secret: JSON array of Playwright cookie objects')
+      process.exit(1)
+    }
+
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled'],
+    })
+
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 800 },
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      extraHTTPHeaders: {
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    })
+
+    let cookies
+    try {
+      cookies = JSON.parse(process.env.LINKEDIN_COOKIES)
+    } catch {
+      console.error('[sync-avatar] LINKEDIN_COOKIES is not valid JSON')
+      process.exit(1)
+    }
+
+    await context.addCookies(cookies)
+    const page = await context.newPage()
+    await runSync(page)
+  } else {
+    if (!existsSync(BROWSER_DATA)) {
+      mkdirSync(BROWSER_DATA, { recursive: true })
+    }
+
+    browser = await chromium.launchPersistentContext(BROWSER_DATA, {
+      headless: false,
+      viewport: { width: 1280, height: 800 },
+      channel: 'msedge',
+    })
+
+    const page = browser.pages()[0] || await browser.newPage()
+    await runSync(page)
   }
 
-  const browser = await chromium.launchPersistentContext(BROWSER_DATA, {
-    headless: false,
-    viewport: { width: 1280, height: 800 },
-    channel: 'msedge',
-  })
-
-  const page = browser.pages()[0] || await browser.newPage()
-
-  try {
+  async function runSync(page) {
     console.log(`[sync-avatar] Navigating to ${LINKEDIN_URL}...`)
     await page.goto(LINKEDIN_URL, { waitUntil: 'domcontentloaded', timeout: 30000 })
 
     const currentUrl = page.url()
     if (currentUrl.includes('authwall') || currentUrl.includes('login')) {
-      console.log('')
-      console.log('[sync-avatar] LinkedIn requires login.')
-      console.log('[sync-avatar] Please log in to LinkedIn in the browser window.')
-      console.log('[sync-avatar] After logging in, the session will persist for future runs.')
-      console.log('[sync-avatar] Waiting for you to log in (30s timeout after page load)...')
-      console.log('')
-
-      await page.waitForURL('**/in/ayazziaansari*', { timeout: 120000 })
-      console.log('[sync-avatar] Login detected. Continuing...')
+      if (isCI) {
+        console.error('[sync-avatar] LinkedIn requires login. Cookies may be expired.')
+        console.error('[sync-avatar] Update the LINKEDIN_COOKIES GitHub secret with fresh cookies.')
+        process.exit(1)
+      } else {
+        console.log('')
+        console.log('[sync-avatar] LinkedIn requires login. Please log in in the browser window.')
+        console.log('[sync-avatar] Session will persist for future runs.')
+        console.log('')
+        await page.waitForURL('**/in/ayazziaansari*', { timeout: 120000 })
+        console.log('[sync-avatar] Login detected. Continuing...')
+      }
     }
 
-    await page.waitForTimeout(3000)
+    await page.waitForTimeout(isCI ? 5000 : 3000)
 
     const profilePhotoSelector = [
       '.pv-top-card__photo img',
@@ -85,14 +124,27 @@ async function syncAvatar() {
       'img[src*="profile-displayphoto"]',
     ].join(', ')
 
-    const photoEl = await page.$(profilePhotoSelector)
+    let photoEl = await page.$(profilePhotoSelector)
+
     if (!photoEl) {
-      console.error('[sync-avatar] Could not find profile photo element on the page.')
-      console.error('[sync-avatar] Available images with licdn:')
-      const imgs = await page.$$eval('img[src*="licdn"]', els =>
-        els.map(e => ({ src: e.src?.slice(0, 80), w: e.width, h: e.height, alt: e.alt }))
+      console.log('[sync-avatar] Profile photo element not found directly. Trying alternative approach...')
+      const allImgs = await page.$$eval('img[src*="licdn"]', els =>
+        els.filter(e => e.width > 50 && e.height > 50 && e.src.includes('profile-displayphoto'))
+           .map(e => ({ src: e.src, w: e.width, h: e.height }))
       )
-      console.error(JSON.stringify(imgs, null, 2))
+      if (allImgs.length > 0) {
+        photoEl = await page.$(`img[src="${allImgs[0].src}"]`)
+      }
+    }
+
+    if (!photoEl) {
+      console.error('[sync-avatar] Could not find profile photo element.')
+      if (!isCI) {
+        const imgs = await page.$$eval('img', els =>
+          els.filter(e => e.src && e.width > 50).map(e => ({ src: e.src.slice(0, 100), w: e.width, h: e.height, alt: e.alt }))
+        )
+        console.error('[sync-avatar] Available images:', JSON.stringify(imgs.slice(0, 10), null, 2))
+      }
       process.exit(1)
     }
 
@@ -103,27 +155,23 @@ async function syncAvatar() {
 
     if (!force && existsSync(AVATAR_PATH)) {
       const oldSize = statSync(AVATAR_PATH).size
-      if (oldSize === newSize) {
-        console.log('[sync-avatar] Photo unchanged (same byte size). Skipping.')
-        if (checkOnly) {
-          console.log('[sync-avatar] --check mode: no changes needed.')
-        } else {
-          console.log('[sync-avatar] No commit needed.')
-        }
+      if (Math.abs(oldSize - newSize) < 100) {
+        console.log('[sync-avatar] Photo unchanged (size delta < 100 bytes). Skipping.')
+        if (existsSync(TEMP_SCREENSHOT)) rmSync(TEMP_SCREENSHOT)
+        console.log('[sync-avatar] Done — no changes needed.')
         return
       }
     }
 
     copyFileSync(TEMP_SCREENSHOT, AVATAR_PATH)
+    if (existsSync(TEMP_SCREENSHOT)) rmSync(TEMP_SCREENSHOT)
     console.log(`[sync-avatar] Saved new avatar (${newSize} bytes)`)
 
-    console.log('[sync-avatar] Generating favicon sizes via sharp-cli...')
+    console.log('[sync-avatar] Generating favicon sizes via sharp...')
+    const sharp = (await import('sharp')).default
     for (const { name, size } of SIZES) {
       const outPath = join(PUBLIC, name)
-      execSync(
-        `npx --yes sharp-cli -i "${AVATAR_PATH}" -o "${outPath}" resize ${size} ${size} --withoutEnlargement`,
-        { stdio: 'pipe', cwd: ROOT }
-      )
+      await sharp(AVATAR_PATH).resize(size, size, { fit: 'cover' }).png().toFile(outPath)
       const genSize = statSync(outPath).size
       console.log(`[sync-avatar]   ${name}: ${genSize} bytes`)
     }
@@ -136,37 +184,34 @@ async function syncAvatar() {
     console.log('[sync-avatar] Bumping favicon cache-bust version in index.html...')
     const htmlPath = join(ROOT, 'index.html')
     let html = readFileSync(htmlPath, 'utf8')
-    const vMatch = html.match(/href="\/(favicon|apple-touch)[^"]*\?v=(\d+)"/)
-    const currentVersion = vMatch ? parseInt(vMatch[2]) : 1
+    const vMatch = html.match(/\?v=(\d+)/)
+    const currentVersion = vMatch ? parseInt(vMatch[1]) : 1
     const nextVersion = currentVersion + 1
-    html = html.replace(/href="\/(favicon|apple-touch)[^"]*\?v=\d+"/g, (match) => {
-      if (match.includes('?v=')) {
-        return match.replace(/\?v=\d+/, `?v=${nextVersion}`)
-      }
-      return match
-    })
+    html = html.replace(/\?v=\d+/g, `?v=${nextVersion}`)
     if (!html.includes('?v=')) {
       html = html.replace(
-        /(<link rel="icon" type="image\/png" sizes="32x32" href="\/favicon-32x32\.png)"/,
+        /(href="\/favicon-32x32\.png)"/,
         '$1?v=' + nextVersion + '"'
       )
     }
     writeFileSync(htmlPath, html)
 
-    console.log('[sync-avatar] Committing to git...')
-    try {
-      execSync('git add public/ayaz-avatar.png public/favicon-16x16.png public/favicon-32x32.png public/favicon.ico public/apple-touch-icon.png index.html', { stdio: 'pipe', cwd: ROOT })
-      execSync('git commit -m "chore: auto-sync LinkedIn profile photo [skip ci]"', { stdio: 'pipe', cwd: ROOT })
-      execSync('git push origin main', { stdio: 'pipe', cwd: ROOT })
-      console.log('[sync-avatar] Pushed to GitHub. Vercel will auto-deploy.')
-    } catch (e) {
-      console.log('[sync-avatar] Git commit/push skipped (nothing to commit or not in a repo).')
+    if (!isCI) {
+      console.log('[sync-avatar] Committing to git...')
+      try {
+        execSync('git add public/ayaz-avatar.png public/favicon-16x16.png public/favicon-32x32.png public/favicon.ico public/apple-touch-icon.png index.html', { stdio: 'pipe', cwd: ROOT })
+        execSync('git commit -m "chore: auto-sync LinkedIn profile photo [skip ci]"', { stdio: 'pipe', cwd: ROOT })
+        execSync('git push origin main', { stdio: 'pipe', cwd: ROOT })
+        console.log('[sync-avatar] Pushed to GitHub.')
+      } catch {
+        console.log('[sync-avatar] Git commit/push skipped (nothing to commit or not in a repo).')
+      }
     }
 
     console.log('[sync-avatar] Done!')
-  } finally {
-    await browser.close()
   }
+
+  await browser.close()
 }
 
 syncAvatar().catch(err => {

@@ -25,7 +25,8 @@
     "test:ops": "npx tsx tests/ops-dashboard.test.ts",
     "diagnose:rag": "npx tsx scripts/diagnose-rag.ts",
     "sync:avatar": "node scripts/sync-avatar.mjs",
-    "sync:avatar:check": "node scripts/sync-avatar.mjs --check"
+    "sync:avatar:check": "node scripts/sync-avatar.mjs --check",
+    "extract:cookies": "node scripts/extract-linkedin-cookies.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",
@@ -54,6 +55,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "playwright": "^1.61.1",
+    "sharp": "^0.35.3",
     "simple-icons": "^16.11.0",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
