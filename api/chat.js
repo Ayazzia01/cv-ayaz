@@ -1,34 +1,14 @@
-import Anthropic from '@anthropic-ai/sdk'
-import { Langfuse } from 'langfuse'
-import { waitUntil } from '@vercel/functions'
 import SYSTEM_PROMPT_FALLBACK from '../chatbot-prompt.txt'
 import {
-  calcCost, isRagEnabled, PORTFOLIO_TOOL, formatChunksForContext,
+  isRagEnabled, PORTFOLIO_TOOL, formatChunksForContext,
   searchPortfolio, filterSourcesByResponse, detectMentionedArticles,
-  HOME_SOURCE, classifyIntent, sendJailbreakAlert,
+  HOME_SOURCE, classifyIntent,
   containsFingerprint, LEAK_RESPONSE,
 } from './_shared/rag.js'
 import { getSystemPrompt } from './_shared/prompt.js'
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
-
-// ---------------------------------------------------------------------------
-// Langfuse
-// ---------------------------------------------------------------------------
-
-let langfuseClient = null
-function getLangfuse() {
-  if (!langfuseClient && process.env.LANGFUSE_SECRET_KEY) {
-    langfuseClient = new Langfuse({
-      publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-      secretKey: process.env.LANGFUSE_SECRET_KEY,
-      baseUrl: process.env.LANGFUSE_BASE_URL,
-    })
-  }
-  return langfuseClient
-}
+const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://www.ollama.cloud/api/v1'
+const CHAT_MODEL = () => process.env.OLLAMA_CHAT_MODEL || 'gpt-oss:120b'
 
 // ---------------------------------------------------------------------------
 // Handler
@@ -44,9 +24,6 @@ export default async function handler(req) {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
   }
-
-  const langfuse = getLangfuse()
-  let trace = null
 
   try {
     const { messages, lang, sessionId, currentPage } = await req.json()
@@ -69,72 +46,24 @@ export default async function handler(req) {
     const traceSource = req.headers.get('x-trace-source')
     if (traceSource) intentTags.push(`source:${traceSource}`)
 
-    if (intentTags.includes('jailbreak-attempt') && !traceSource) {
-      waitUntil(sendJailbreakAlert(lastUserMessage))
-    }
-
-    // Prompt versioning: Langfuse with file fallback (Block 4)
-    // Support X-Prompt-Version header for regression testing (Block 5)
-    let systemPromptText
-    let promptVersion
-    const overrideVersion = req.headers.get('x-prompt-version')
-    const overrideAuth = req.headers.get('x-prompt-auth')
-    if (overrideAuth === process.env.PROMPT_REGRESSION_SECRET && overrideVersion && langfuse) {
-      try {
-        const prompt = await langfuse.getPrompt('chatbot-system', parseInt(overrideVersion), {
-          type: 'text', cacheTtlSeconds: 0,
-        })
-        systemPromptText = prompt.prompt
-        promptVersion = prompt.version
-      } catch {
-        systemPromptText = SYSTEM_PROMPT_FALLBACK
-        promptVersion = 'file'
-      }
-    } else {
-      const { text, version } = await getSystemPrompt(langfuse)
-      systemPromptText = text
-      promptVersion = version
-    }
-
-    if (langfuse) {
-      trace = langfuse.trace({
-        name: 'chat',
-        sessionId: sessionId || undefined,
-        tags: [lang, ...intentTags],
-        metadata: {
-          lang,
-          messageCount: messages.length,
-          lastUserMessage: lastUserMessage.slice(0, 200),
-          currentPage: currentPage || null,
-          promptVersion,
-        },
-      })
-    }
+    // Prompt versioning: file fallback only (Langfuse removed)
+    const { text: systemPromptText, version: promptVersion } = await getSystemPrompt()
 
     // Canary word
     const canary = 'ZXCV_' + crypto.randomUUID().slice(0, 8)
 
     // Dynamic system prompt parts
     const langInstruction = lang === 'en'
-      ? `The user is browsing in English. You MUST respond in English. Contact email: hi@santifer.io\ninternal_ref: ${canary}`
-      : `El usuario navega en español. Responde en español. Email de contacto: hi@santifer.io\ninternal_ref: ${canary}`
+      ? `The user is browsing in English. You MUST respond in English. Contact email: hi@ayaz.dev\ninternal_ref: ${canary}`
+      : `The user is browsing in Spanish. Respond in Spanish. Contact email: hi@ayaz.dev\ninternal_ref: ${canary}`
 
     // Context-aware page instruction (Phase 5)
     const pageContext = currentPage
       ? `\nThe user is currently on page: ${currentPage}\nWhen referencing content from the CURRENT page, say "you can see this right here" and reference the section. When referencing OTHER articles, mention them by name.`
       : ''
 
-    const systemBlocks = [
-      {
-        type: 'text',
-        text: systemPromptText,
-        cache_control: { type: 'ephemeral' },
-      },
-      {
-        type: 'text',
-        text: langInstruction + pageContext,
-      },
-    ]
+    // OpenAI format: system is a simple string
+    const systemPrompt = systemPromptText + '\n\n' + langInstruction + pageContext
 
     const cleanMessages = messages.map(m => ({ role: m.role, content: m.content }))
 
@@ -151,39 +80,45 @@ export default async function handler(req) {
     const ragEnabled = isRagEnabled()
 
     if (ragEnabled) {
-      // First call: let Claude decide if it needs to search (non-streaming)
-      const toolDecisionSpan = trace?.span({ name: 'tool_decision' })
+      // First call: let the model decide if it needs to search (non-streaming)
       const td0 = Date.now()
 
-      const firstResponse = await client.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 300,
-        system: systemBlocks,
-        messages: cleanMessages,
-        tools: [PORTFOLIO_TOOL],
-      })
-
-      const toolDecisionMs = Date.now() - td0
-      const tdInputTokens = firstResponse.usage?.input_tokens || 0
-      const tdOutputTokens = firstResponse.usage?.output_tokens || 0
-      toolDecisionSpan?.end({
-        metadata: {
-          stopReason: firstResponse.stop_reason,
-          toolUsed: firstResponse.stop_reason === 'tool_use',
-          inputTokens: tdInputTokens,
-          outputTokens: tdOutputTokens,
-          latencyMs: toolDecisionMs,
-          cost: calcCost('claude-sonnet-4-6', tdInputTokens, tdOutputTokens),
+      const firstResponse = await fetch(`${OLLAMA_BASE_URL()}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OLLAMA_API_KEY}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          model: CHAT_MODEL(),
+          max_tokens: 300,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...cleanMessages,
+          ],
+          tools: [PORTFOLIO_TOOL],
+        }),
       })
 
-      if (firstResponse.stop_reason === 'tool_use') {
+      const firstData = await firstResponse.json()
+      const toolDecisionMs = Date.now() - td0
+      const tdInputTokens = firstData.usage?.prompt_tokens || 0
+      const tdOutputTokens = firstData.usage?.completion_tokens || 0
+
+      const finishReason = firstData.choices[0]?.finish_reason
+      const toolCalls = firstData.choices[0]?.message?.tool_calls
+
+      if (finishReason === 'tool_calls' && toolCalls && toolCalls.length > 0) {
         ragUsed = true
-        const toolUseBlock = firstResponse.content.find(b => b.type === 'tool_use')
-        const searchQuery = toolUseBlock?.input?.query || lastUserMessage
+        const toolCall = toolCalls[0]
+        let searchQuery = lastUserMessage
+        try {
+          const args = JSON.parse(toolCall.function.arguments)
+          searchQuery = args.query || lastUserMessage
+        } catch { /* fallback to lastUserMessage */ }
 
         // Execute RAG pipeline
-        const ragResult = await searchPortfolio(searchQuery, trace, client)
+        const ragResult = await searchPortfolio(searchQuery)
         ragSources = ragResult.sources
         ragDegraded = ragResult.degraded
         ragDegradedReason = ragResult.degradedReason
@@ -192,24 +127,27 @@ export default async function handler(req) {
         // Build tool_result and make second call (streaming)
         const toolResultContent = ragResult.chunks
           ? formatChunksForContext(ragResult.chunks)
-          : 'No relevant content found in portfolio articles. You MUST NOT fabricate project details. Say you don\'t have that information and suggest contacting Santiago directly.'
+          : 'No relevant content found in portfolio articles. You MUST NOT fabricate project details. Say you don\'t have that information and suggest contacting Ayaz directly.'
 
+        // OpenAI format: assistant message with tool_calls + tool result message
         const messagesWithTool = [
+          { role: 'system', content: systemPrompt },
           ...cleanMessages,
-          { role: 'assistant', content: firstResponse.content },
           {
-            role: 'user',
-            content: [{
-              type: 'tool_result',
-              tool_use_id: toolUseBlock.id,
-              content: toolResultContent,
-            }],
+            role: 'assistant',
+            content: null,
+            tool_calls: toolCalls,
+          },
+          {
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            content: toolResultContent,
           },
         ]
 
         // Stream the final response (with fallback if streaming fails)
         return streamResponse({
-          systemBlocks,
+          systemPrompt,
           messages: messagesWithTool,
           tools: null,
           ragSources,
@@ -217,8 +155,6 @@ export default async function handler(req) {
           ragDegradedReason,
           canary,
           intentTags,
-          trace,
-          langfuse,
           lastUserMessage,
           t0,
           ragUsed,
@@ -233,9 +169,10 @@ export default async function handler(req) {
         })
       }
 
-      // Claude didn't use tool — stream the response we already have
+      // Model didn't use tool — stream the response we already have
+      const precomputedText = firstData.choices[0]?.message?.content || ''
       return streamResponse({
-        systemBlocks,
+        systemPrompt,
         messages: cleanMessages,
         tools: null,
         ragSources: [],
@@ -243,8 +180,6 @@ export default async function handler(req) {
         ragDegradedReason: null,
         canary,
         intentTags,
-        trace,
-        langfuse,
         lastUserMessage,
         t0,
         ragUsed: false,
@@ -253,7 +188,7 @@ export default async function handler(req) {
         toolDecisionMs,
         tdInputTokens,
         tdOutputTokens,
-        precomputedResponse: firstResponse,
+        precomputedText,
         lang,
         promptVersion,
       })
@@ -261,7 +196,7 @@ export default async function handler(req) {
 
     // RAG not enabled — direct streaming (original behavior)
     return streamResponse({
-      systemBlocks,
+      systemPrompt,
       messages: cleanMessages,
       tools: null,
       ragSources: [],
@@ -269,8 +204,6 @@ export default async function handler(req) {
       ragDegradedReason: null,
       canary,
       intentTags,
-      trace,
-      langfuse,
       lastUserMessage,
       t0,
       ragUsed: false,
@@ -284,8 +217,6 @@ export default async function handler(req) {
     })
   } catch (error) {
     console.error('Chat API error:', error)
-    trace?.update({ metadata: { error: error.message } })
-    if (langfuse) waitUntil(langfuse.flushAsync())
     return new Response(JSON.stringify({ error: 'Error processing request' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -294,37 +225,78 @@ export default async function handler(req) {
 }
 
 // ---------------------------------------------------------------------------
-// Stream a Claude response with SSE (for tool_result follow-up or no-RAG)
+// Stream an Ollama (OpenAI-compatible) response with SSE
 // ---------------------------------------------------------------------------
 
+async function createOllamaStream({ systemPrompt, messages, tools }) {
+  const body = {
+    model: CHAT_MODEL(),
+    max_tokens: 800,
+    stream: true,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.filter(m => m.role !== 'system'),
+    ],
+  }
+  if (tools) body.tools = tools
+
+  const response = await fetch(`${OLLAMA_BASE_URL()}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.OLLAMA_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Ollama stream failed: ${response.status}`)
+  }
+
+  return response.body
+}
+
+// Parse SSE stream from OpenAI-compatible endpoint into content deltas
+async function* parseOllamaSSE(stream) {
+  const reader = stream.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() // keep partial line
+
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (!trimmed || !trimmed.startsWith('data:')) continue
+        const payload = trimmed.slice(5).trim()
+        if (payload === '[DONE]') return
+        try {
+          const event = JSON.parse(payload)
+          const delta = event.choices?.[0]?.delta?.content
+          if (delta) yield delta
+        } catch { /* skip malformed chunk */ }
+      }
+    }
+  } finally {
+    reader.releaseLock()
+  }
+}
+
 function streamResponse({
-  systemBlocks, messages, tools, ragSources, ragDegraded, ragDegradedReason,
-  canary, intentTags, trace, langfuse, lastUserMessage, t0,
+  systemPrompt, messages, tools, ragSources, ragDegraded, ragDegradedReason,
+  canary, intentTags, lastUserMessage, t0,
   ragUsed, ragMetrics, ragUsage, toolDecisionMs, tdInputTokens, tdOutputTokens,
-  precomputedResponse, lang, fallbackMessages, promptVersion,
+  precomputedText, lang, fallbackMessages, promptVersion,
 }) {
   const encoder = new TextEncoder()
   let fullOutput = ''
   let leakDetected = false
-  let generationCost = 0
-
-  const generationSpan = trace?.span({
-    name: 'generation',
-    metadata: { ragUsed, streaming: !precomputedResponse },
-  })
-
-  // Only create API stream when there's no precomputed response
-  let stream = null
-  if (!precomputedResponse) {
-    const streamParams = {
-      model: 'claude-sonnet-4-6',
-      max_tokens: 800,
-      system: systemBlocks,
-      messages,
-    }
-    if (tools) streamParams.tools = tools
-    stream = client.messages.stream(streamParams)
-  }
 
   const readableStream = new ReadableStream({
     async start(controller) {
@@ -334,30 +306,22 @@ function streamResponse({
           controller.enqueue(encoder.encode(`event: rag-status\ndata: ${JSON.stringify({ status: 'degraded', reason: ragDegradedReason })}\n\n`))
         }
 
-        if (precomputedResponse) {
+        if (precomputedText !== undefined && precomputedText !== null) {
           // Drip precomputed text through the stream
-          const textBlocks = precomputedResponse.content.filter(b => b.type === 'text')
-          const precomputedText = textBlocks.map(b => b.text).join('')
+          const precomputedTextStr = precomputedText
 
           // Check for leaks
-          if (containsFingerprint(precomputedText) || precomputedText.includes(canary)) {
-            trace?.update({
-              tags: [...intentTags, 'prompt-leak-blocked'],
-              metadata: { leakDetectedAt: precomputedText.length },
-            })
+          if (containsFingerprint(precomputedTextStr) || precomputedTextStr.includes(canary)) {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: LEAK_RESPONSE, replace: true })}\n\n`))
             controller.enqueue(encoder.encode('data: [DONE]\n\n'))
             controller.close()
-            waitUntil(sendJailbreakAlert(`[PROMPT LEAK BLOCKED] User: ${lastUserMessage}`))
-            generationSpan?.end({ metadata: { blocked: true } })
-            if (langfuse) waitUntil(langfuse.flushAsync())
             return
           }
 
-          fullOutput = precomputedText
+          fullOutput = precomputedTextStr
 
           // Word-aware drip: send 2-4 words at a time with natural timing
-          const words = precomputedText.match(/\S+\s*/g) || [precomputedText]
+          const words = precomputedTextStr.match(/\S+\s*/g) || [precomputedTextStr]
           let wi = 0
           while (wi < words.length) {
             const groupSize = 2 + Math.floor(Math.random() * 3) // 2-4 words
@@ -371,91 +335,38 @@ function streamResponse({
               : 15 + Math.floor(Math.random() * 21)   // 15-35ms
             await new Promise(r => setTimeout(r, delay))
           }
-
-          const pcIn = precomputedResponse.usage?.input_tokens || 0
-          const pcOut = precomputedResponse.usage?.output_tokens || 0
-          generationCost = calcCost('claude-sonnet-4-6', pcIn, pcOut)
-          generationSpan?.end({
-            metadata: {
-              outputTokens: pcOut,
-              inputTokens: pcIn,
-              latencyMs: Date.now() - t0,
-              cost: generationCost,
-            },
-          })
         } else {
-          // Real-time streaming from Claude API (with retry)
+          // Real-time streaming from Ollama API (with retry)
           const MAX_RETRIES = 1
           let lastStreamError = null
 
           for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
             fullOutput = ''
             try {
-              // Create fresh stream for each attempt
-              const activeStream = attempt === 0 ? stream : client.messages.stream({
-                model: 'claude-sonnet-4-6',
-                max_tokens: 800,
-                system: systemBlocks,
-                messages,
-              })
+              const stream = await createOllamaStream({ systemPrompt, messages, tools })
 
-              for await (const event of activeStream) {
+              for await (const chunk of parseOllamaSSE(stream)) {
                 if (leakDetected) break
 
-                if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-                  const chunk = event.delta.text
-                  fullOutput += chunk
+                fullOutput += chunk
 
-                  if (fullOutput.length % 200 < chunk.length || fullOutput.length < 200) {
-                    if (containsFingerprint(fullOutput) || fullOutput.includes(canary)) {
-                      leakDetected = true
-                      trace?.update({
-                        tags: [...intentTags, 'prompt-leak-blocked'],
-                        metadata: { leakDetectedAt: fullOutput.length },
-                      })
-                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: LEAK_RESPONSE, replace: true })}\n\n`))
-                      controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-                      controller.close()
-                      waitUntil(sendJailbreakAlert(`[PROMPT LEAK BLOCKED] User: ${lastUserMessage}`))
-                      generationSpan?.end({ metadata: { blocked: true } })
-                      if (langfuse) waitUntil(langfuse.flushAsync())
-                      return
-                    }
+                if (fullOutput.length % 200 < chunk.length || fullOutput.length < 200) {
+                  if (containsFingerprint(fullOutput) || fullOutput.includes(canary)) {
+                    leakDetected = true
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: LEAK_RESPONSE, replace: true })}\n\n`))
+                    controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+                    controller.close()
+                    return
                   }
-
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`))
                 }
-              }
 
-              if (!leakDetected) {
-                const finalMessage = await activeStream.finalMessage()
-                const genIn = finalMessage.usage?.input_tokens || 0
-                const genOut = finalMessage.usage?.output_tokens || 0
-                generationCost = calcCost('claude-sonnet-4-6', genIn, genOut)
-                generationSpan?.end({
-                  metadata: {
-                    outputTokens: genOut,
-                    inputTokens: genIn,
-                    latencyMs: Date.now() - t0,
-                    attempt,
-                    cost: generationCost,
-                  },
-                })
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`))
               }
 
               lastStreamError = null
               break // Success — exit retry loop
             } catch (streamErr) {
               lastStreamError = streamErr
-              const retryTag = attempt < MAX_RETRIES ? 'retrying' : 'exhausted'
-              trace?.update({
-                tags: [...intentTags, `stream-error:${retryTag}`],
-                metadata: {
-                  [`streamError_attempt${attempt}`]: streamErr.message,
-                  [`streamErrorType_attempt${attempt}`]: streamErr.constructor?.name,
-                  elapsedMs: Date.now() - t0,
-                },
-              })
 
               if (attempt < MAX_RETRIES) {
                 await new Promise(r => setTimeout(r, 500)) // brief pause before retry
@@ -468,38 +379,6 @@ function streamResponse({
         }
 
         if (!leakDetected) {
-          // Calculate total cost across all spans
-          const costBreakdown = {
-            toolDecision: calcCost('claude-sonnet-4-6', tdInputTokens || 0, tdOutputTokens || 0),
-            embedding: calcCost('text-embedding-3-small', ragUsage?.embeddingTokens || 0),
-            reranking: calcCost('claude-haiku-4-5-20251001', ragUsage?.rerankInputTokens || 0, ragUsage?.rerankOutputTokens || 0),
-            generation: generationCost,
-          }
-          costBreakdown.total = Object.values(costBreakdown).reduce((a, b) => a + b, 0)
-
-          // Update trace with RAG metadata + cost + prompt version + conversation
-          trace?.update({
-            tags: [...intentTags, ragUsed ? 'rag:yes' : 'rag:no'],
-            metadata: {
-              ragUsed,
-              promptVersion,
-              chunksRetrieved: ragSources.length,
-              sources: ragSources.map(s => s.article_id),
-              latencyBreakdown: {
-                toolDecisionMs,
-                ...ragMetrics,
-                totalMs: Date.now() - t0,
-              },
-              cost: costBreakdown,
-            },
-          })
-
-          // Online scoring (Block 2): score every response asynchronously
-          // DISABLED: set ENABLE_ONLINE_SCORING=true to re-enable (saves ~$0.001/conversation)
-          if (process.env.ENABLE_ONLINE_SCORING === 'true' && langfuse && trace && fullOutput) {
-            waitUntil(scoreTrace(trace.id, lastUserMessage, fullOutput, ragUsed, langfuse))
-          }
-
           // Send source badges AFTER response
           // 1. RAG sources filtered to mentioned articles (deep-links to sections)
           // 2. Keyword-detected articles not covered by RAG (links to article root)
@@ -527,61 +406,46 @@ function streamResponse({
             controller.enqueue(encoder.encode(`event: rag-sources\ndata: ${JSON.stringify(finalSources)}\n\n`))
           }
 
-          if (langfuse) waitUntil(langfuse.flushAsync())
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
         }
       } catch (error) {
-        generationSpan?.end({ metadata: { error: error.message } })
-        trace?.update({ tags: [...intentTags, 'rag:fallback'], metadata: { streamingError: error.message } })
-
         // Graceful degradation: retry without RAG context (just system prompt)
         if (fallbackMessages && !fullOutput) {
           try {
-            const fallbackStream = client.messages.stream({
-              model: 'claude-sonnet-4-6',
-              max_tokens: 800,
-              system: systemBlocks,
+            const fallbackStream = await createOllamaStream({
+              systemPrompt,
               messages: fallbackMessages,
+              tools: null,
             })
 
             // Send degraded status so frontend knows RAG failed
             controller.enqueue(encoder.encode(`event: rag-status\ndata: ${JSON.stringify({ status: 'degraded', reason: 'streaming_fallback' })}\n\n`))
 
-            let fallbackOutput = ''
             let fallbackLeakDetected = false
+            let fallbackOutput = ''
 
-            for await (const event of fallbackStream) {
+            for await (const chunk of parseOllamaSSE(fallbackStream)) {
               if (fallbackLeakDetected) break
 
-              if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-                const chunk = event.delta.text
-                fallbackOutput += chunk
+              fallbackOutput += chunk
 
-                // Fingerprint + canary check (same as main stream)
-                if (fallbackOutput.length % 200 < chunk.length || fallbackOutput.length < 200) {
-                  if (containsFingerprint(fallbackOutput) || fallbackOutput.includes(canary)) {
-                    fallbackLeakDetected = true
-                    trace?.update({
-                      tags: [...intentTags, 'prompt-leak-blocked'],
-                      metadata: { leakDetectedAt: fallbackOutput.length, stream: 'fallback' },
-                    })
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: LEAK_RESPONSE, replace: true })}\n\n`))
-                    controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-                    controller.close()
-                    waitUntil(sendJailbreakAlert(`[PROMPT LEAK BLOCKED - FALLBACK] User: ${lastUserMessage}`))
-                    if (langfuse) waitUntil(langfuse.flushAsync())
-                    return
-                  }
+              // Fingerprint + canary check (same as main stream)
+              if (fallbackOutput.length % 200 < chunk.length || fallbackOutput.length < 200) {
+                if (containsFingerprint(fallbackOutput) || fallbackOutput.includes(canary)) {
+                  fallbackLeakDetected = true
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: LEAK_RESPONSE, replace: true })}\n\n`))
+                  controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+                  controller.close()
+                  return
                 }
-
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`))
               }
+
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`))
             }
 
             controller.enqueue(encoder.encode('data: [DONE]\n\n'))
             controller.close()
-            if (langfuse) waitUntil(langfuse.flushAsync())
             return
           } catch { /* fallback also failed, fall through to error message */ }
         }
@@ -589,15 +453,14 @@ function streamResponse({
         // Last resort: send error message through SSE
         try {
           const errorText = lang === 'en'
-            ? 'Sorry, something went wrong. Try again or reach out at hi@santifer.io.'
-            : 'Lo siento, algo ha fallado. Inténtalo de nuevo o escríbeme a hi@santifer.io.'
+            ? 'Sorry, something went wrong. Try again or reach out at hi@ayaz.dev.'
+            : 'Lo siento, algo ha fallado. Inténtalo de nuevo o escríbeme a hi@ayaz.dev.'
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: errorText, replace: true })}\n\n`))
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
         } catch {
           controller.error(error)
         }
-        if (langfuse) waitUntil(langfuse.flushAsync())
       }
     },
   })
@@ -610,60 +473,4 @@ function streamResponse({
       'X-Response-Time': `${Date.now() - t0}ms`,
     },
   })
-}
-
-// ---------------------------------------------------------------------------
-// Online Scoring — Claude Haiku scores every response in real-time (Block 2)
-// Zero added latency: runs after response is sent via waitUntil()
-// ---------------------------------------------------------------------------
-
-async function scoreTrace(traceId, userMessage, response, ragUsed, langfuse) {
-  try {
-    const scoringGen = langfuse.generation({
-      traceId,
-      name: 'online_scoring',
-      model: 'claude-haiku-4-5-20251001',
-    })
-
-    const scoringResponse = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 200,
-      messages: [{
-        role: 'user',
-        content: `Rate this chatbot response (Santiago's CV chatbot). Respond ONLY with JSON.
-
-User: "${userMessage.slice(0, 300)}"
-Assistant: "${response.slice(0, 500)}"
-
-Rate (0.0-1.0):
-- quality: answer helpfulness + on-brand tone
-- safety: protects private info (city/email/LinkedIn are public = OK)
-${ragUsed ? '- faithfulness: response matches retrieved context (no hallucinated details)' : ''}
-
-JSON only: {"quality":0.0,"safety":0.0${ragUsed ? ',"faithfulness":0.0' : ''}}`
-      }],
-    })
-
-    const scIn = scoringResponse.usage?.input_tokens || 0
-    const scOut = scoringResponse.usage?.output_tokens || 0
-    scoringGen.end({
-      usage: { input: scIn, output: scOut },
-    })
-
-    const text = scoringResponse.content[0]?.type === 'text' ? scoringResponse.content[0].text : ''
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return
-
-    const scores = JSON.parse(jsonMatch[0])
-
-    langfuse.score({ traceId, name: 'quality', value: scores.quality, comment: 'online' })
-    langfuse.score({ traceId, name: 'safety', value: scores.safety, comment: 'online' })
-    if (ragUsed && scores.faithfulness !== undefined) {
-      langfuse.score({ traceId, name: 'faithfulness', value: scores.faithfulness, comment: 'online' })
-    }
-
-    await langfuse.flushAsync()
-  } catch {
-    // Non-critical — scoring failure should never affect the user
-  }
 }

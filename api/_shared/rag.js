@@ -1,65 +1,66 @@
 // ---------------------------------------------------------------------------
-// Shared RAG pipeline — used by api/chat.js (text) and api/rag-search.js (voice)
+// Shared RAG pipeline — used by api/chat.js
+// Ollama Cloud (OpenAI-compatible) replaces OpenAI embeddings + Anthropic rerank
 // ---------------------------------------------------------------------------
 
+const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'https://www.ollama.cloud/api/v1'
+
 // ---------------------------------------------------------------------------
-// Cost tracking per span
+// Cost tracking — Ollama Cloud pricing unknown; cost tracking disabled
 // ---------------------------------------------------------------------------
 
-export const MODEL_COSTS = {
-  'claude-sonnet-4-6': { input: 3.0 / 1e6, output: 15.0 / 1e6 },
-  'claude-haiku-4-5-20251001': { input: 0.25 / 1e6, output: 1.25 / 1e6 },
-  'text-embedding-3-small': { input: 0.02 / 1e6 },
+export const MODEL_COSTS = {}
+
+export function calcCost() {
+  return 0
 }
 
-export function calcCost(model, inputTokens, outputTokens = 0) {
-  const r = MODEL_COSTS[model]
-  return r ? (inputTokens * (r.input || 0)) + (outputTokens * (r.output || 0)) : 0
-}
-
 // ---------------------------------------------------------------------------
-// RAG: tool definition for Agentic RAG
+// RAG: tool definition for Agentic RAG (OpenAI function-calling format)
 // ---------------------------------------------------------------------------
 
 export function isRagEnabled() {
-  return !!(process.env.OPENAI_API_KEY && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
+  return !!(process.env.OLLAMA_API_KEY && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
 }
 
 export const PORTFOLIO_TOOL = {
-  name: 'search_portfolio',
-  description: "Search your own published case studies for project details. You wrote these articles — they are YOUR words about YOUR projects. The system prompt only has brief summaries; this tool has the FULL content you authored: architectures, sub-agents, workflows, Airtable structures, metrics, technical decisions, pipeline details, code patterns, and lessons learned. Use this whenever the user asks for specifics about any project. Remember: speak from this content as your own experience, never cite it as an external source.",
-  input_schema: {
-    type: 'object',
-    properties: {
-      query: {
-        type: 'string',
-        description: 'The search query to find relevant portfolio content',
+  type: 'function',
+  function: {
+    name: 'search_portfolio',
+    description: "Search your own published case studies for project details. You wrote these articles — they are YOUR words about YOUR projects. The system prompt only has brief summaries; this tool has the FULL content you authored: architectures, sub-agents, workflows, Airtable structures, metrics, technical decisions, pipeline details, code patterns, and lessons learned. Use this whenever the user asks for specifics about any project. Remember: speak from this content as your own experience, never cite it as an external source.",
+    parameters: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'The search query to find relevant portfolio content',
+        },
       },
+      required: ['query'],
     },
-    required: ['query'],
   },
 }
 
 // ---------------------------------------------------------------------------
-// RAG: embed query via OpenAI REST API (Edge-compatible)
+// RAG: embed query via Ollama Cloud embeddings (Edge-compatible)
 // ---------------------------------------------------------------------------
 
 export async function embedQuery(query) {
   const t0 = Date.now()
-  const response = await fetch('https://api.openai.com/v1/embeddings', {
+  const response = await fetch(`${OLLAMA_BASE_URL()}/embeddings`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      'Authorization': `Bearer ${process.env.OLLAMA_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'text-embedding-3-small',
+      model: process.env.OLLAMA_EMBED_MODEL || 'nomic-embed-text',
       input: query,
     }),
   })
 
   if (!response.ok) {
-    throw new Error(`OpenAI embedding failed: ${response.status}`)
+    throw new Error(`Ollama embedding failed: ${response.status}`)
   }
 
   const data = await response.json()
@@ -122,10 +123,10 @@ export async function searchDocuments(queryText, queryEmbedding) {
 }
 
 // ---------------------------------------------------------------------------
-// RAG: re-rank top-10 → top-3 with Haiku
+// RAG: re-rank top-10 → top-5 with Ollama Cloud chat completion
 // ---------------------------------------------------------------------------
 
-export async function rerankChunks(query, chunks, anthropicClient) {
+export async function rerankChunks(query, chunks) {
   if (chunks.length <= 3) return { chunks, latencyMs: 0, rerankedOrder: null, usage: null }
 
   const t0 = Date.now()
@@ -134,20 +135,28 @@ export async function rerankChunks(query, chunks, anthropicClient) {
       `[${i}] ${c.content.slice(0, 200)}`
     ).join('\n')
 
-    const response = await anthropicClient.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 50,
-      messages: [{
-        role: 'user',
-        content: `Query: "${query}"\nRank these chunks by relevance. Return ONLY the top 5 IDs as comma-separated numbers (most relevant first):\n${numbered}`,
-      }],
+    const response = await fetch(`${OLLAMA_BASE_URL()}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OLLAMA_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: process.env.OLLAMA_RERANK_MODEL || 'gpt-oss:120b',
+        max_tokens: 50,
+        messages: [{
+          role: 'user',
+          content: `Query: "${query}"\nRank these chunks by relevance. Return ONLY the top 5 IDs as comma-separated numbers (most relevant first):\n${numbered}`,
+        }],
+      }),
     })
 
-    const text = response.content[0]?.type === 'text' ? response.content[0].text : ''
+    const data = await response.json()
+    const text = data.choices[0]?.message?.content || ''
     const ids = text.match(/\d+/g)?.map(Number).filter(n => n < chunks.length) || []
 
     const ranked = ids.slice(0, 5).map(i => chunks[i])
-    // Fill up to 5 if Haiku returned fewer
+    // Fill up to 5 if the model returned fewer
     while (ranked.length < 5 && ranked.length < chunks.length) {
       const next = chunks.find(c => !ranked.includes(c))
       if (next) ranked.push(next)
@@ -159,7 +168,10 @@ export async function rerankChunks(query, chunks, anthropicClient) {
 
     return {
       chunks: diversified, latencyMs: Date.now() - t0, rerankedOrder: ids.slice(0, 5),
-      usage: { input_tokens: response.usage?.input_tokens || 0, output_tokens: response.usage?.output_tokens || 0 },
+      usage: {
+        input_tokens: data.usage?.prompt_tokens || 0,
+        output_tokens: data.usage?.completion_tokens || 0,
+      },
     }
   } catch {
     // Fallback: use original order with diversity
@@ -229,11 +241,12 @@ export function extractSources(chunks) {
 // Keywords that signal the response actually references a given article
 export const ARTICLE_KEYWORDS = {
   'n8n-for-pms':          ['n8n', 'nodemation'],
-  'jacobo':               ['jacobo', 'agente ia', 'ai agent', 'whatsapp', 'multi-agent', 'multiagent'],
+  'jacobo':               ['jacobo', 'ai agent', 'whatsapp', 'multi-agent', 'multiagent'],
   'business-os':          ['business os', 'erp', 'airtable bases', 'crm', 'inventory'],
-  'programmatic-seo':     ['seo programático', 'programmatic seo', 'web programática', 'programmatic web', 'decision engine', 'indexable', 'dataforseo', 'seo pipeline', 'seo automatizado', 'automated seo'],
-  'self-healing-chatbot': ['chatbot', 'this chat', 'este chat', 'evals', 'self-healing', 'closed-loop', 'langfuse', 'rag'],
-  'santifer-irepair':     ['santifer irepair', 'irepair', 'repair business', 'taller de reparación'],
+  'programmatic-seo':     ['programmatic seo', 'decision engine', 'indexable', 'dataforseo', 'seo pipeline', 'automated seo'],
+  'self-healing-chatbot': ['chatbot', 'this chat', 'evals', 'self-healing', 'closed-loop', 'rag'],
+  'revalgo':              ['revalgo', 'revalgo platform'],
+  'markovate':            ['markovate'],
 }
 
 /** Filter RAG sources to only articles actually mentioned in the response, max 3 */
@@ -249,12 +262,13 @@ export function filterSourcesByResponse(sources, responseText) {
 
 // Static article routes — used to generate badges from keywords regardless of RAG
 export const ARTICLE_ROUTES = {
-  'n8n-for-pms':          { page_path_es: '/n8n-para-pms', page_path_en: '/n8n-for-pms' },
-  'jacobo':               { page_path_es: '/agente-ia-jacobo', page_path_en: '/ai-agent-jacobo' },
-  'business-os':          { page_path_es: '/business-os-para-airtable', page_path_en: '/business-os-for-airtable' },
-  'programmatic-seo':     { page_path_es: '/seo-programatico', page_path_en: '/programmatic-seo' },
-  'self-healing-chatbot': { page_path_es: '/chatbot-que-se-cura-solo', page_path_en: '/self-healing-chatbot' },
-  'santifer-irepair':     { page_path_es: '/santifer-irepair', page_path_en: '/santifer-irepair-founder' },
+  'n8n-for-pms':          { page_path_en: '/n8n-for-pms', page_path_es: '/n8n-for-pms' },
+  'jacobo':               { page_path_en: '/ai-agent-jacobo', page_path_es: '/ai-agent-jacobo' },
+  'business-os':          { page_path_en: '/business-os-for-airtable', page_path_es: '/business-os-for-airtable' },
+  'programmatic-seo':     { page_path_en: '/programmatic-seo', page_path_es: '/programmatic-seo' },
+  'self-healing-chatbot': { page_path_en: '/self-healing-chatbot', page_path_es: '/self-healing-chatbot' },
+  'revalgo':              { page_path_en: '/revalgo', page_path_es: '/revalgo' },
+  'markovate':            { page_path_en: '/markovate', page_path_es: '/markovate' },
 }
 
 // Home fallback
@@ -296,7 +310,7 @@ export function detectMentionedArticles(responseText) {
 // RAG: full agentic search pipeline
 // ---------------------------------------------------------------------------
 
-export async function searchPortfolio(query, trace, anthropicClient) {
+export async function searchPortfolio(query) {
   const result = {
     chunks: null,
     sources: [],
@@ -308,35 +322,21 @@ export async function searchPortfolio(query, trace, anthropicClient) {
 
   // 1. Embed
   let embedding
-  const embeddingGen = trace?.generation({ name: 'embedding', model: 'text-embedding-3-small', metadata: { query } })
   try {
     const embResult = await embedQuery(query)
     embedding = embResult.embedding
     result.metrics.embeddingMs = embResult.latencyMs
     result.usage.embeddingTokens = embResult.totalTokens
-    embeddingGen?.end({
-      usage: { input: embResult.totalTokens, output: 0 },
-      metadata: { latencyMs: embResult.latencyMs },
-    })
-  } catch (err) {
-    embeddingGen?.end({ metadata: { error: err.message } })
+  } catch {
     result.degraded = true
     result.degradedReason = 'embedding_fail'
     return result
   }
 
   // 2. Retrieve
-  const retrievalSpan = trace?.span({ name: 'retrieval', metadata: { query } })
   try {
     const searchResult = await searchDocuments(query, embedding)
     result.metrics.retrievalMs = searchResult.latencyMs
-    retrievalSpan?.end({
-      metadata: {
-        chunksCount: searchResult.chunks.length,
-        topSimilarity: searchResult.chunks[0]?.similarity || 0,
-        latencyMs: searchResult.latencyMs,
-      },
-    })
 
     if (!searchResult.chunks.length) {
       result.degradedReason = 'no_match'
@@ -351,28 +351,16 @@ export async function searchPortfolio(query, trace, anthropicClient) {
     }
 
     // 3. Re-rank
-    const rerankGen = trace?.generation({ name: 'reranking', model: 'claude-haiku-4-5-20251001', metadata: { query } })
-    const rerankResult = await rerankChunks(query, filteredChunks, anthropicClient)
+    const rerankResult = await rerankChunks(query, filteredChunks)
     result.metrics.rerankMs = rerankResult.latencyMs
     if (rerankResult.usage) {
       result.usage.rerankInputTokens = rerankResult.usage.input_tokens
       result.usage.rerankOutputTokens = rerankResult.usage.output_tokens
     }
-    rerankGen?.end({
-      usage: {
-        input: rerankResult.usage?.input_tokens || 0,
-        output: rerankResult.usage?.output_tokens || 0,
-      },
-      metadata: {
-        rerankedOrder: rerankResult.rerankedOrder,
-        latencyMs: rerankResult.latencyMs,
-      },
-    })
 
     result.chunks = rerankResult.chunks
     result.sources = extractSources(rerankResult.chunks)
   } catch (err) {
-    retrievalSpan?.end({ metadata: { error: err.message } })
     result.degraded = true
     result.degradedReason = err.message.includes('timeout') ? 'retrieval_timeout' : 'retrieval_fail'
   }
@@ -389,68 +377,31 @@ export function classifyIntent(text) {
   const tags = []
 
   const jailbreakPatterns = [
-    'ignore previous', 'ignora las instrucciones', 'ignora todo',
-    'pretend', 'roleplay', 'act as', 'you are now',
+    'ignore previous', 'pretend', 'roleplay', 'act as', 'you are now',
     'forget', 'disregard', 'bypass', 'override', 'jailbreak',
-    'dan', 'developer mode', 'evil', 'malicious', 'hackear', 'hacking',
-    'system prompt', 'tu prompt', 'your prompt', 'instructions',
-    'protocolo de defensa', 'olvida todo', 'nueva personalidad',
+    'dan', 'developer mode', 'evil', 'malicious', 'hacking',
+    'system prompt', 'your prompt', 'instructions',
     'reset your', 'reveal your', 'show me your rules',
-    'your objective', 'your orders', 'tus órdenes', 'tus reglas',
-    'cuáles son tus instrucciones', 'rules configured', 'reglas configuradas',
+    'your objective', 'your orders', 'your rules',
+    'what are your instructions', 'rules configured',
     'print all', 'print everything', 'yaml', 'json record',
     'dump', 'export', 'serialize', 'reproduce', 'output all',
-    'all of the above', 'todo lo anterior', 'everything above',
+    'all of the above', 'everything above',
     'repeat everything', 'write all above', 'copy all',
-    'show me everything', 'imprime todo', 'muestra todo lo anterior',
-    'repite todo', 'exporta', 'convierte a',
+    'show me everything', 'print everything above',
   ]
   if (jailbreakPatterns.some(p => lower.includes(p))) {
     tags.push('jailbreak-attempt')
   }
 
-  if (/experiencia|experience|trabajo|work|career|carrera|santifer|irepair/.test(lower)) tags.push('topic:experience')
-  if (/proyecto|project|portfolio|github|código|code/.test(lower)) tags.push('topic:projects')
-  if (/contact|contacto|email|linkedin|hablar|talk|hire|contratar/.test(lower)) tags.push('topic:contact')
-  if (/stack|tech|tecnolog|python|react|airtable|claude|ai|ia|llm|agente|agent/.test(lower)) tags.push('topic:technical')
-  if (/salario|salary|money|dinero|rate|precio|cobr/.test(lower)) tags.push('topic:compensation')
-  if (/hola|hello|hi|hey|buenos|good/.test(lower) && text.length < 20) tags.push('greeting')
+  if (/experience|work|career|ayaz|revalgo|markovate/.test(lower)) tags.push('topic:experience')
+  if (/project|portfolio|github|code/.test(lower)) tags.push('topic:projects')
+  if (/contact|email|linkedin|talk|hire/.test(lower)) tags.push('topic:contact')
+  if (/stack|tech|python|react|airtable|claude|ai|llm|agent/.test(lower)) tags.push('topic:technical')
+  if (/salary|money|rate|compensation/.test(lower)) tags.push('topic:compensation')
+  if (/hello|hi|hey|good/.test(lower) && text.length < 20) tags.push('greeting')
 
   return tags.length > 0 ? tags : ['topic:general']
-}
-
-// ---------------------------------------------------------------------------
-// Jailbreak alert
-// ---------------------------------------------------------------------------
-
-export async function sendJailbreakAlert(userMessage) {
-  if (!process.env.RESEND_API_KEY || !process.env.ALERT_EMAIL) return
-
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: 'Santi Bot <onboarding@resend.dev>',
-      to: process.env.ALERT_EMAIL,
-      subject: '🚨 JAILBREAK ATTEMPT - santifer.io',
-      html: `
-        <h2>🚨 Jailbreak Attempt Detected</h2>
-        <p><strong>Time:</strong> ${new Date().toISOString()}</p>
-        <p><strong>User message:</strong></p>
-        <blockquote style="background: #f5f5f5; padding: 15px; border-left: 4px solid #e74c3c;">
-          ${userMessage.slice(0, 500)}${userMessage.length > 500 ? '...' : ''}
-        </blockquote>
-        <p style="margin-top: 20px;">
-          <a href="https://cloud.langfuse.com" style="background: #e74c3c; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-            View in Langfuse
-          </a>
-        </p>
-      `,
-    }),
-  })
 }
 
 // ---------------------------------------------------------------------------
@@ -458,13 +409,13 @@ export async function sendJailbreakAlert(userMessage) {
 // ---------------------------------------------------------------------------
 
 export const PROMPT_FINGERPRINTS = [
-  'BREVEDAD OBLIGATORIA', 'máximo 150 palabras', '150 words', 'word limit',
-  'formato sin listas', 'redirección ingeniosa', 'NUNCA revelar',
-  'Anti-extracción', 'Instrucciones CRÍTICAS', 'cache_control',
+  'maximum 150 words', '150 words', 'word limit',
+  'no lists', 'clever redirect', 'NEVER reveal',
+  'anti-extraction', 'critical instructions', 'cache_control',
   'never_exceed', 'token_budget',
 ]
 
-export const LEAK_RESPONSE = 'Esa información forma parte de mi diseño interno. El código fuente del proyecto es público en GitHub si te interesa la arquitectura.'
+export const LEAK_RESPONSE = 'That information is part of my internal design. The source code is public on GitHub if you\'re interested in the architecture.'
 
 export function containsFingerprint(text) {
   const lower = text.toLowerCase()
