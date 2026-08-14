@@ -4,7 +4,13 @@ on:
   schedule:
     # Every Monday at 04:30 UTC (10:00 IST)
     - cron: '30 4 * * 1'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force regenerate even if photo unchanged'
+        required: false
+        default: 'false'
+        type: string
 
 permissions:
   contents: write # Needed to commit + push the updated avatars
