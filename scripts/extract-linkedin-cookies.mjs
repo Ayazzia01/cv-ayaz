@@ -60,7 +60,11 @@ async function extractCookies() {
     await page.waitForTimeout(2000)
 
     const context = page.context()
-    const cookies = await context.cookies(['https://www.linkedin.com'])
+    // Get ALL cookies from all domains — li_at may be on .linkedin.com
+    const allCookies = await context.cookies()
+    const cookies = allCookies.filter(c =>
+      c.domain.includes('linkedin.com')
+    )
 
     const filtered = cookies.filter(c =>
       c.name === 'li_at' ||

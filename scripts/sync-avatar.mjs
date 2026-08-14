@@ -130,7 +130,7 @@ async function syncAvatar() {
 
   async function runSync(page) {
     console.log(`[sync-avatar] Navigating to ${LINKEDIN_URL}...`)
-    await page.goto(LINKEDIN_URL, { waitUntil: 'networkidle', timeout: 45000 })
+    await page.goto(LINKEDIN_URL, { waitUntil: 'domcontentloaded', timeout: 60000 })
 
     const currentUrl = page.url()
     console.log(`[sync-avatar] Current URL: ${currentUrl}`)
@@ -152,7 +152,7 @@ async function syncAvatar() {
     }
 
     // Wait for page to fully render
-    await page.waitForTimeout(isCI ? 8000 : 3000)
+    await page.waitForTimeout(isCI ? 10000 : 3000)
 
     // Try multiple selectors with retry
     const selectors = [
