@@ -1,7 +1,7 @@
 // Debug endpoint: test Ollama embeddings API
 import { createClient } from '@supabase/supabase-js'
 
-export const config = { maxDuration: 120 }
+export const config = { maxDuration: 120, runtime: 'nodejs' }
 
 export default async function handler(req) {
   const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'https://ollama.com/v1'
