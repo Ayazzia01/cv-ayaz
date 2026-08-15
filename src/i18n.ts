@@ -11,7 +11,7 @@ export const translations = {
   en: {
     greeting: 'who builds applied AI systems',
     greetingRoles: ['AI Engineer', 'ML Engineer', 'Computer Vision Engineer', 'Researcher'],
-    pillLabels: ['AI Engineer', 'CV Engineer'],
+    pillLabels: ['AI Engineer', 'ML Engineer', 'CV Engineer'],
     email: 'ayazzia01@gmail.com',
     role: '',
     story: {
@@ -55,11 +55,11 @@ export const translations = {
     ],
     summary: {
       title: 'Professional Summary',
-      p1: 'AI/ML engineer with hands-on experience across the full model lifecycle — from',
+      p1: 'AI/ML engineer with hands-on experience across the full model lifecycle — from ',
       p1Highlight: 'research and fine-tuning to deployment and operationalisation',
       p1End:
         '. Worked with LLMs (prompt engineering, fine-tuning, RAG, VLM pipelines, Azure Foundry) and computer vision (object detection, segmentation, GANs, try-on, safety monitoring). Published research on embryo time-lapse analysis; DAAD WISE research scholar at Universität Ulm.',
-      p2: 'Comfortable owning client relationships and stabilising',
+      p2: 'Comfortable owning client relationships and stabilising ',
       p2Highlight: 'high-priority products → preventing churn → restoring trust',
       p2End: '. Hands-on across the full lifecycle: research, fine-tuning, RAG, deployment, and client ownership.',
       cards: [
@@ -86,7 +86,7 @@ export const translations = {
         },
         {
           title: 'Deployment & Operationalisation',
-          desc: 'Azure Foundry, Azure Logic Apps, LLM deployment and ops',
+          desc: 'Azure Foundry, Azure Logic Apps, LLM load-balancing across endpoint regions, deployment and ops',
         },
         {
           title: 'Computer Vision',
@@ -125,7 +125,7 @@ export const translations = {
         },
         {
           name: 'Deployment',
-          items: ['Azure Foundry', 'Azure Logic Apps'],
+          items: ['Azure Foundry', 'Azure Logic Apps', 'Azure OpenAI'],
         },
         {
           name: 'Programming',
@@ -230,6 +230,7 @@ export const translations = {
           'Implemented highlight feature to map extracted text from PDFs and email',
           'Led onboarding and technical ownership for a newly acquired client',
           'Stabilised a high-priority internal product, restoring client trust and preventing churn',
+          'Implemented intelligent LLM load-balancing across multiple Azure OpenAI endpoint regions — random request routing, failure logging, and automatic endpoint lockout after 3 consecutive failures to eliminate peak-hour timeouts',
         ],
       },
       markovate: {
@@ -349,6 +350,8 @@ export const translations = {
         'OpenCV',
         'Azure Foundry',
         'Azure Logic Apps',
+        'Azure OpenAI',
+        'LLM Load-Balancing',
         'LlamaIndex',
         'Prompt Engineering',
         'LLM Fine-tuning',
@@ -364,7 +367,7 @@ export const translations = {
     },
     cta: {
       title: "Let's talk",
-      desc: "I build applied AI systems — LLMs, computer vision, and everything in between. If you have an interesting AI/ML role, let's talk.",
+      desc: "I build applied AI systems — LLMs, computer vision, and everything in between. If you have an interesting AI/ML role, I'd love to hear from you.",
       contact: 'Contact',
     },
     ui: {

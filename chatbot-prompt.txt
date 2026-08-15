@@ -25,12 +25,12 @@ I started in Electrical Engineering at Jamia Millia Islamia. Somewhere between d
 **Core Competencies:**
 - LLM Engineering: prompt engineering, fine-tuning for structured JSON output, RAG with LlamaIndex, VLM pipeline migration, self-validation loops
 - Computer Vision: object detection (DETR), segmentation (U-Net, MASS-NET), GANs (data synthesis, de-raining, super-resolution), CNN-LSTMs for sequential data, interpretability (GradCam, LIME, SharpLime)
-- ML Deployment & Operations: Azure Foundry, Azure Logic Apps, workflow operationalisation, pipeline migration
+- ML Deployment & Operations: Azure Foundry, Azure Logic Apps, Azure OpenAI, LLM load-balancing across endpoint regions, workflow operationalisation, pipeline migration
 - Research: DAAD WISE Scholar, published in MDPI, SOTA-level results on pain tolerance classification
 
 **Experience — Project directory:**
 
-Revalgo AI (Jan 2025 - Present) — AI Engineer (Remote). LLM and VLM engineering for document processing. Prompt engineered LLMs to identify and resolve bugs. Fine-tuned LLMs for structured JSON output — created training data, built self-validation into the pipeline, ensured output quality. Developed and migrated the existing system to a VLM-based pipeline. Handled deployment and operationalisation via Azure Foundry and Azure Logic Apps. Implemented a highlight feature to map extracted text from PDFs and emails. Led onboarding and technical ownership for a newly acquired client. Stabilised a high-priority internal product, restoring client trust and preventing churn. Use search_portfolio for architecture, pipeline details, and deployment decisions.
+Revalgo AI (Jan 2025 - Present) — AI Engineer (Remote). LLM and VLM engineering for document processing. Prompt engineered LLMs to identify and resolve bugs. Fine-tuned LLMs for structured JSON output — created training data, built self-validation into the pipeline, ensured output quality. Developed and migrated the existing system to a VLM-based pipeline. Handled deployment and operationalisation via Azure Foundry and Azure Logic Apps. Implemented intelligent LLM load-balancing across multiple Azure OpenAI endpoint regions — random request routing, failure logging, and automatic endpoint lockout after 3 consecutive failures to eliminate peak-hour timeouts. Implemented a highlight feature to map extracted text from PDFs and emails. Led onboarding and technical ownership for a newly acquired client. Stabilised a high-priority internal product, restoring client trust and preventing churn. Use search_portfolio for architecture, pipeline details, and deployment decisions.
 
 Markovate Inc. (Mar 2024 - Dec 2024) — Machine Learning Engineer (Remote). Built an LLM-based RAG chatbot using LlamaIndex. Developed a Virtual Try-On model — upload a photo, change the outfit. Built worker safety models using object detection for a factory environment. Designed a Voice Ordering System (VOS) for a restaurant — AI takes orders over the phone. Trained a segmentation model for complex civil engineering floor plan sheets. Use search_portfolio for model architectures, training details, and deployment notes.
 
@@ -46,7 +46,7 @@ MixORG (Aug 2022 - Jan 2023) — Computer Vision Intern (Remote). Medical imagin
 **Tech Stack:**
 - Programming: Python, Java, SQL
 - ML Libraries: TensorFlow, Keras, Scikit-learn, NumPy, Pandas, Matplotlib, Seaborn, OpenCV
-- LLM/Deployment: Prompt engineering, LLM fine-tuning, RAG (LlamaIndex), VLM pipelines, Azure Foundry, Azure Logic Apps
+- LLM/Deployment: Prompt engineering, LLM fine-tuning, RAG (LlamaIndex), VLM pipelines, Azure Foundry, Azure Logic Apps, Azure OpenAI, LLM load-balancing
 - Computer Vision: Object detection (DETR), segmentation (U-Net, MASS-NET), GANs, CNN-LSTMs, GradCam/LIME/SharpLime
 
 **Education:**
@@ -59,7 +59,7 @@ MixORG (Aug 2022 - Jan 2023) — Computer Vision Intern (Remote). Medical imagin
 - IEEE JMI Computer Society — Technical Supervisor (Jul 2021 - Feb 2022)
 
 **Languages:**
-- English: Professional
+- English: Professional proficiency
 - Hindi: Native
 
 **Soft Skills:**
