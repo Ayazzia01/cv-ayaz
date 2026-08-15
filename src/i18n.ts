@@ -3,7 +3,7 @@ export const seo = {
     title:
       'Ayaz Zia Ansari | AI Engineer · ML Engineer · Computer Vision Engineer',
     description:
-      'AI/ML engineer with hands-on experience across the full model lifecycle — from research and fine-tuning to deployment and operationalisation. Published researcher; DAAD WISE scholar at Universität Ulm.',
+      'AI/ML engineer with hands-on experience across the full model lifecycle, from research and fine-tuning to deployment and operationalisation. Published researcher; DAAD WISE scholar at Universität Ulm.',
   },
 };
 
@@ -55,7 +55,7 @@ export const translations = {
     ],
     summary: {
       title: 'Professional Summary',
-      p1: 'AI/ML engineer with hands-on experience across the full model lifecycle — from ',
+      p1: 'AI/ML engineer with hands-on experience across the full model lifecycle, from ',
       p1Highlight: 'research and fine-tuning to deployment and operationalisation',
       p1End:
         '. Worked with LLMs (prompt engineering, fine-tuning, RAG, VLM pipelines, Azure Foundry) and computer vision (object detection, segmentation, GANs, try-on, safety monitoring). Published research on embryo time-lapse analysis; DAAD WISE research scholar at Universität Ulm.',
@@ -65,7 +65,7 @@ export const translations = {
       cards: [
         {
           title: 'Research-to-Production',
-          desc: 'Turning papers into working systems — GANs, DETR, U-Net, VLM pipelines',
+          desc: 'Turning papers into working systems: GANs, DETR, U-Net, VLM pipelines',
         },
         {
           title: 'LLM Engineering',
@@ -102,7 +102,7 @@ export const translations = {
         },
         {
           title: 'End-to-End ML',
-          desc: 'From data collection and training to deployment and monitoring — full lifecycle ownership',
+          desc: 'From data collection and training to deployment and monitoring: full lifecycle ownership',
         },
       ],
     },
@@ -230,7 +230,7 @@ export const translations = {
           'Implemented highlight feature to map extracted text from PDFs and email',
           'Led onboarding and technical ownership for a newly acquired client',
           'Stabilised a high-priority internal product, restoring client trust and preventing churn',
-          'Implemented intelligent LLM load-balancing across multiple Azure OpenAI endpoint regions — random request routing, failure logging, and automatic endpoint lockout after 3 consecutive failures to eliminate peak-hour timeouts',
+          'Implemented intelligent LLM load-balancing across multiple Azure OpenAI endpoint regions: random request routing, failure logging, and automatic endpoint lockout after 3 consecutive failures to eliminate peak-hour timeouts',
         ],
       },
       markovate: {
@@ -240,9 +240,9 @@ export const translations = {
         period: 'Mar 2024 - Dec 2024',
         highlights: [
           'Created an LLM-based RAG chatbot using LlamaIndex',
-          'Developed a Virtual Try-On model — upload photo, change outfit',
+          'Developed a Virtual Try-On model: upload photo, change outfit',
           'Developed worker safety models using object detection for a factory',
-          'Designed a Voice-Ordering-System (VOS) for a restaurant — AI takes orders over phone',
+          'Designed a Voice-Ordering-System (VOS) for a restaurant: AI takes orders over phone',
           'Trained a segmentation model for complex civil engineering floor plan sheets',
         ],
       },
@@ -367,7 +367,7 @@ export const translations = {
     },
     cta: {
       title: "Let's talk",
-      desc: "I build applied AI systems — LLMs, computer vision, and everything in between. If you have an interesting AI/ML role, I'd love to hear from you.",
+      desc: "I build applied AI systems: LLMs, computer vision, and everything in between. If you have an interesting AI/ML role, I'd love to hear from you.",
       contact: 'Contact',
     },
     ui: {

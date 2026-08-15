@@ -70,7 +70,7 @@ const PERSON = {
   name: 'Ayaz Zia Ansari',
   alternateName: ['Ayaz Zia Ansari', 'Ayaz'],
   url: 'https://cv-ayaz.vercel.app',
-  description: "AI/ML engineer with hands-on experience across the full model lifecycle — from research and fine-tuning to deployment and operationalisation. Published researcher; DAAD WISE research scholar.",
+  description: "AI/ML engineer with hands-on experience across the full model lifecycle, from research and fine-tuning to deployment and operationalisation. Published researcher; DAAD WISE research scholar.",
   jobTitle: ['AI Engineer', 'ML Engineer', 'Computer Vision Engineer'],
   sameAs: [
     'https://www.linkedin.com/in/ayazziaansari',
